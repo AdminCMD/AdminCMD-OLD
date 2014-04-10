@@ -1,4 +1,4 @@
-AdminCMD [![Build Status](https://travis-ci.org/Belphemur/AdminCmd.png?branch=master)](https://travis-ci.org/Belphemur/AdminCmd)
+AdminCMD [![Build Status](https://travis-ci.org/AdminCMD/AdminCMD.png?branch=master)](https://travis-ci.org/AdminCMD/AdminCMD)
 ================================
 Unleash the power of Bukkit!
 
