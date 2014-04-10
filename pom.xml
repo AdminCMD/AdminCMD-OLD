@@ -8,9 +8,9 @@
     <inceptionYear>2012</inceptionYear>
     <description>AdminCMD is a powerful plug-in that brings you commands that can give you total management over your server. Featuring the most widely used commands in Bukkit server management such as: inventory management, banishment of bad players, limitation to teleporting, setting spawn and home way points, and much, much more!</description>
     <scm>
-        <connection>scm:git:git@github.com:Belphemur/AdminCmd.git</connection>
-        <url>scm:git:git@github.com:Belphemur/AdminCmd.git</url>
-        <developerConnection>scm:git:git@github.com:Belphemur/AdminCmd.git</developerConnection>
+        <connection>scm:git:git@github.com:AdminCMD/AdminCMD.git</connection>
+        <url>scm:git:git@github.com:AdminCMD/AdminCMD.git</url>
+        <developerConnection>scm:git:git@github.com:AdminCMD/AdminCMD.git</developerConnection>
     </scm>
     <organization>
         <name>AdminCmd Team</name>
