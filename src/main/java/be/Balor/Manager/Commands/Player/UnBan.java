@@ -30,6 +30,7 @@ import be.Balor.Tools.CommandUtils.Immunity;
 import be.Balor.Tools.CommandUtils.Users;
 import be.Balor.bukkit.AdminCmd.ACHelper;
 import be.Balor.bukkit.AdminCmd.LocaleHelper;
+import java.util.UUID;
 
 /**
  * @author Balor (aka Antoine Aflalo)

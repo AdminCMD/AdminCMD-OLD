@@ -16,25 +16,24 @@
  ************************************************************************/
 package be.Balor.Manager.Commands.Player;
 
-import java.util.HashMap;
-
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import be.Balor.Manager.LocaleManager;
 import be.Balor.Manager.Commands.CommandArgs;
 import be.Balor.Manager.Exceptions.ActionNotPermitedException;
 import be.Balor.Manager.Exceptions.PlayerNotFound;
+import be.Balor.Manager.LocaleManager;
 import be.Balor.Manager.Permissions.PermChild;
 import be.Balor.Manager.Permissions.PermissionManager;
 import be.Balor.Player.ACPlayer;
 import be.Balor.Player.EmptyPlayer;
-import be.Balor.Tools.Type;
 import be.Balor.Tools.CommandUtils.Immunity;
 import be.Balor.Tools.CommandUtils.Users;
 import be.Balor.Tools.Lister.Lister;
+import be.Balor.Tools.Type;
 import be.Balor.bukkit.AdminCmd.ACPluginManager;
 import be.Balor.bukkit.AdminCmd.LocaleHelper;
+import java.util.HashMap;
+import java.util.UUID;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * @author Balor (aka Antoine Aflalo)
@@ -99,7 +98,7 @@ public class Mute extends PlayerCommand {
 						Integer tmpMute = null;
 						try {
 							tmpMute = args.getInt(args.length - 1);
-							final String unmute = player.getName();
+							final UUID unmute = player.getUniqueId();
 							final CommandSender senderFinal = sender;
 							acp.setPower(Type.MUTED_COMMAND, "Muted(including commands) by " + msg);
 							ACPluginManager.getScheduler().runTaskLaterAsynchronously(getPlugin(), new Runnable() {
@@ -107,7 +106,7 @@ public class Mute extends PlayerCommand {
 								@Override
 								public void run() {
 									ACPlayer.getPlayer(unmute).removePower(Type.MUTED_COMMAND);
-									LocaleManager.sI18n(senderFinal, "commandMuteDisabledTarget", "player", unmute);
+									LocaleManager.sI18n(senderFinal, "commandMuteDisabledTarget", "player", Users.getPlayerName(player));
 									final Lister list = Lister.getLister(Lister.List.MUTE, false);
 									if (list != null) {
 										list.update();
@@ -153,14 +152,14 @@ public class Mute extends PlayerCommand {
 					Integer tmpMute = null;
 					try {
 						tmpMute = args.getInt(args.length - 1);
-						final String unmute = player.getName();
+						final UUID unmute = player.getUniqueId();
 						final CommandSender senderFinal = sender;
 						ACPluginManager.getScheduler().runTaskLaterAsynchronously(getPlugin(), new Runnable() {
 
 							@Override
 							public void run() {
 								ACPlayer.getPlayer(unmute).removePower(Type.MUTED);
-								LocaleManager.sI18n(senderFinal, "muteDisabledTarget", "player", unmute);
+								LocaleManager.sI18n(senderFinal, "muteDisabledTarget", "player", Users.getPlayerName(player));
 								final Lister list = Lister.getLister(Lister.List.MUTE, false);
 								if (list != null) {
 									list.update();

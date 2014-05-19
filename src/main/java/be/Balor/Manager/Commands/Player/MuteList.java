@@ -17,16 +17,18 @@
 
 package be.Balor.Manager.Commands.Player;
 
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-
-import be.Balor.Manager.LocaleManager;
 import be.Balor.Manager.Commands.CommandArgs;
 import be.Balor.Manager.Exceptions.ActionNotPermitedException;
 import be.Balor.Manager.Exceptions.PlayerNotFound;
+import be.Balor.Manager.LocaleManager;
 import be.Balor.Tools.Lister.EmptyListException;
 import be.Balor.Tools.Lister.Lister;
+import be.Balor.bukkit.AdminCmd.ACPluginManager;
 import be.Balor.bukkit.AdminCmd.LocaleHelper;
+import java.util.UUID;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 
 /**
  * @author Lathanael (aka Philippe Leipold)
@@ -62,7 +64,7 @@ public class MuteList extends PlayerCommand {
 
 		try {
 			for (final String s : Lister.getLister(Lister.List.MUTE).getPage(
-					page)) {
+					page)) {                      
 				sender.sendMessage(s);
 			}
 		} catch (final EmptyListException e) {

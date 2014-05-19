@@ -1,5 +1,56 @@
 package be.Balor.bukkit.AdminCmd;
 
+import be.Balor.Importer.Essentials.EssentialsImport;
+import be.Balor.Importer.IImport;
+import be.Balor.Importer.ImportTools;
+import be.Balor.Kit.KitInstance;
+import be.Balor.Manager.CommandManager;
+import be.Balor.Manager.Commands.CommandArgs;
+import be.Balor.Manager.Commands.Tp.TeleportCommand;
+import be.Balor.Manager.Exceptions.WorldNotLoaded;
+import be.Balor.Manager.LocaleManager;
+import be.Balor.Manager.Permissions.PermissionManager;
+import be.Balor.Player.ACPlayer;
+import be.Balor.Player.Ban;
+import be.Balor.Player.BannedIP;
+import be.Balor.Player.FilePlayer;
+import be.Balor.Player.FilePlayerFactory;
+import be.Balor.Player.IBan;
+import be.Balor.Player.ITempBan;
+import be.Balor.Player.PlayerManager;
+import be.Balor.Player.sql.SQLPlayerFactory;
+import be.Balor.Tools.Blocks.BlockRemanence;
+import be.Balor.Tools.CommandUtils.Materials;
+import be.Balor.Tools.CommandUtils.Users;
+import be.Balor.Tools.Configuration.ExConfigurationSection;
+import be.Balor.Tools.Configuration.File.ExtendedConfiguration;
+import be.Balor.Tools.Converter.PlayerConverter;
+import be.Balor.Tools.Converter.WorldConverter;
+import be.Balor.Tools.Debug.ACLogger;
+import be.Balor.Tools.Debug.DebugLog;
+import be.Balor.Tools.Exceptions.InvalidInputException;
+import be.Balor.Tools.Files.DataManager;
+import be.Balor.Tools.Files.FileManager;
+import be.Balor.Tools.Help.HelpLister;
+import be.Balor.Tools.Help.HelpLoader;
+import be.Balor.Tools.Lister.Lister;
+import be.Balor.Tools.MaterialContainer;
+import be.Balor.Tools.Metrics.UpdateChannelPlotter;
+import be.Balor.Tools.Threads.UnBanTask;
+import be.Balor.Tools.Threads.UndoBlockTask;
+import be.Balor.Tools.Type;
+import be.Balor.Tools.Update.UpdateChecker;
+import be.Balor.Tools.Update.UpdateChecker.Channel;
+import be.Balor.Tools.Utils;
+import be.Balor.World.ACWorld;
+import be.Balor.World.FileWorldFactory;
+import be.Balor.World.WorldManager;
+import be.Balor.World.sql.SQLWorldFactory;
+import belgium.Balor.SQL.Database;
+import belgium.Balor.SQL.DatabaseConfig.DatabaseType;
+import belgium.Balor.Workers.AFKWorker;
+import belgium.Balor.Workers.InvisibleWorker;
+import com.google.common.collect.MapMaker;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,7 +73,6 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -34,59 +84,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.mcstats.Metrics.Graph;
-
-import be.Balor.Importer.IImport;
-import be.Balor.Importer.ImportTools;
-import be.Balor.Importer.Essentials.EssentialsImport;
-import be.Balor.Kit.KitInstance;
-import be.Balor.Manager.CommandManager;
-import be.Balor.Manager.LocaleManager;
-import be.Balor.Manager.Commands.CommandArgs;
-import be.Balor.Manager.Commands.Tp.TeleportCommand;
-import be.Balor.Manager.Exceptions.WorldNotLoaded;
-import be.Balor.Manager.Permissions.PermissionManager;
-import be.Balor.Player.ACPlayer;
-import be.Balor.Player.Ban;
-import be.Balor.Player.BannedIP;
-import be.Balor.Player.FilePlayer;
-import be.Balor.Player.FilePlayerFactory;
-import be.Balor.Player.IBan;
-import be.Balor.Player.ITempBan;
-import be.Balor.Player.PlayerManager;
-import be.Balor.Player.sql.SQLPlayerFactory;
-import be.Balor.Tools.MaterialContainer;
-import be.Balor.Tools.Type;
-import be.Balor.Tools.Utils;
-import be.Balor.Tools.Blocks.BlockRemanence;
-import be.Balor.Tools.CommandUtils.Materials;
-import be.Balor.Tools.CommandUtils.Users;
-import be.Balor.Tools.Configuration.ExConfigurationSection;
-import be.Balor.Tools.Configuration.File.ExtendedConfiguration;
-import be.Balor.Tools.Converter.PlayerConverter;
-import be.Balor.Tools.Converter.WorldConverter;
-import be.Balor.Tools.Debug.ACLogger;
-import be.Balor.Tools.Debug.DebugLog;
-import be.Balor.Tools.Exceptions.InvalidInputException;
-import be.Balor.Tools.Files.DataManager;
-import be.Balor.Tools.Files.FileManager;
-import be.Balor.Tools.Help.HelpLister;
-import be.Balor.Tools.Help.HelpLoader;
-import be.Balor.Tools.Lister.Lister;
-import be.Balor.Tools.Metrics.UpdateChannelPlotter;
-import be.Balor.Tools.Threads.UnBanTask;
-import be.Balor.Tools.Threads.UndoBlockTask;
-import be.Balor.Tools.Update.UpdateChecker;
-import be.Balor.Tools.Update.UpdateChecker.Channel;
-import be.Balor.World.ACWorld;
-import be.Balor.World.FileWorldFactory;
-import be.Balor.World.WorldManager;
-import be.Balor.World.sql.SQLWorldFactory;
-import belgium.Balor.SQL.Database;
-import belgium.Balor.SQL.DatabaseConfig.DatabaseType;
-import belgium.Balor.Workers.AFKWorker;
-import belgium.Balor.Workers.InvisibleWorker;
-
-import com.google.common.collect.MapMaker;
 
 /**
  * Handle commands
@@ -134,7 +131,7 @@ public class ACHelper {
         private final ConcurrentMap<String, MaterialContainer> alias = new MapMaker()
                         .makeMap();
         private Map<String, KitInstance> kits = new HashMap<String, KitInstance>();
-        private Map<String, String> deathMessages = new HashMap<String, String>();
+        private Map<String, String> deathMessages = new HashMap<String, String>(); 
         private final ConcurrentMap<String, IBan> bannedPlayers = new MapMaker()
                         .makeMap();
         private final ConcurrentMap<Player, Object> fakeQuitPlayers = new MapMaker()
@@ -173,7 +170,7 @@ public class ACHelper {
 
         private final ConcurrentMap<CommandSender, Player> playersForReplyMessage = new MapMaker()
                         .makeMap();
-
+       
         /**
          * Ban a new player
          *
@@ -190,7 +187,7 @@ public class ACHelper {
                         list.update();
                 }
         }
-
+        
         /**
          * Add an item to the Command BlackList
          *
@@ -872,7 +869,7 @@ public class ACHelper {
          * Return the ban of the player
          *
          * @param player
-         * player's name
+         * player's uuid
          * @return the ban if the player have one, else return null
          */
         public IBan getBan(final String player) {
@@ -1527,7 +1524,7 @@ public class ACHelper {
                                                         + "  `yaw` double DEFAULT NULL,"
                                                         + "  `pitch` double DEFAULT NULL,"
                                                         + "  PRIMARY KEY (`id`),"
-                                                        + "  UNIQUE KEY `name` (`name`)"
+                                                        + "  UNIQUE KEY `uuid` (`uuid`)"
                                                         + ")ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
                                         db.createTable("CREATE TABLE IF NOT EXISTS `ac_powers` ("
                                                         + "  `key` varchar(128) NOT NULL,"
@@ -1640,7 +1637,7 @@ public class ACHelper {
                                                         + "  `category` varchar(64) NOT NULL,"
                                                         + "  PRIMARY KEY (`key`,`player_id`)" + ");");
                                         db.createTable("CREATE TABLE IF NOT EXISTS `ac_players_new` ("
-                                                        + "  `id` INTEGER PRIMARY KEY AUTOINCREMENT ,"
+                                                        + "  `id` INTEGER PRIMARY KEY AUTOINCREMENT,"
                                                         + "  `uuid` varchar(64) NOT NULL,"
                                                         + "  `world` varchar(64) DEFAULT NULL,"
                                                         + "  `x` double DEFAULT NULL,"
@@ -1648,7 +1645,7 @@ public class ACHelper {
                                                         + "  `z` double DEFAULT NULL,"
                                                         + "  `yaw` double  DEFAULT NULL,"
                                                         + "  `pitch` double  DEFAULT NULL,"
-                                                        + "  UNIQUE (`name`)" + ") ;");
+                                                        + "  UNIQUE (`uuid`)" + ") ;");
 
                                         db.createTable("CREATE INDEX home_pid ON ac_homes (player_id);");
                                         db.createTable("CREATE INDEX info_pid ON ac_informations (player_id);");
@@ -1703,19 +1700,19 @@ public class ACHelper {
          * @throws SQLException
          */
         private void updatePlayerTable(final Database db) throws SQLException {
-                if (db.getType() == DatabaseType.MYSQL && db.checkTable("ac_players_new")) {
+                if (db.getType() == DatabaseType.MYSQL && db.checkTable("ac_players")) {
                         final PreparedStatement stmt = db.prepare("SELECT COLLATION_NAME "
                                         + "FROM INFORMATION_SCHEMA.COLUMNS "
                                         + "WHERE COLUMN_NAME =  ? " + "AND TABLE_NAME = ?");
                         stmt.setString(1, "name");
-                        stmt.setString(2, "ac_players_new");
+                        stmt.setString(2, "ac_players");
                         final ResultSet result = stmt.executeQuery();
                         if (result.next() && !"utf8_bin".equals(result.getString(1))) {
                                 db.query("ALTER TABLE  `ac_players_new` "
                                                 + "CHANGE  `name`  `name` VARCHAR( 64 ) "
                                                 + "BINARY CHARACTER " + "SET utf8 COLLATE "
                                                 + "utf8_bin NOT NULL");
-                                ACLogger.info("Updated the collation of the ac_player_new database.");
+                                ACLogger.info("Updated the collation of the ac_player database.");
 
                         }
                         db.closeStatement(stmt);

@@ -39,11 +39,10 @@ public class ACBanListener implements Listener {
 			return;
 		}
 		final Player player = event.getPlayer();
-		IBan ban = ACHelper.getInstance().getBan(player.getName());
+		IBan ban = ACHelper.getInstance().getBan(player.getUniqueId().toString());
 		if (ban == null) {
 			try {
-				ban = ACHelper.getInstance().getBan(
-						event.getAddress().toString().substring(1));
+				ban = ACHelper.getInstance().getBan(event.getAddress().toString().substring(1));
 			} catch (final NoSuchMethodError e) {
 			}
 

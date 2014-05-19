@@ -165,10 +165,7 @@ public class ACIpCheckListener implements Listener {
 	 * @return {@code true} if an IP is found, {@code false} otherwise.
 	 */
 	public boolean ipInUse(final InetAddress address) {
-		if (ips.containsKey(address.toString().substring(1))) {
-			return true;
-		}
-		return false;
+		return ips.containsKey(address.toString().substring(1));
 	}
 
 }

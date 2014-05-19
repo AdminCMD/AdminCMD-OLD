@@ -16,18 +16,11 @@
  ************************************************************************/
 package be.Balor.Manager.Commands.Player;
 
-import java.util.HashMap;
-import java.util.regex.Matcher;
-
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import be.Balor.Manager.LocaleManager;
 import be.Balor.Manager.Commands.CommandArgs;
 import be.Balor.Manager.Exceptions.ActionNotPermitedException;
 import be.Balor.Manager.Exceptions.NotANumberException;
 import be.Balor.Manager.Exceptions.PlayerNotFound;
+import be.Balor.Manager.LocaleManager;
 import be.Balor.Player.ACPlayer;
 import be.Balor.Player.Ban;
 import be.Balor.Player.BannedIP;
@@ -36,17 +29,24 @@ import be.Balor.Player.IBan;
 import be.Balor.Player.ITempBan;
 import be.Balor.Player.TempBannedIP;
 import be.Balor.Player.TempBannedPlayer;
-import be.Balor.Tools.Type;
-import be.Balor.Tools.Utils;
 import be.Balor.Tools.CommandUtils.Immunity;
 import be.Balor.Tools.CommandUtils.Users;
 import be.Balor.Tools.Debug.DebugLog;
 import be.Balor.Tools.Threads.KickTask;
 import be.Balor.Tools.Threads.UnBanTask;
+import be.Balor.Tools.Type;
+import be.Balor.Tools.Utils;
 import be.Balor.bukkit.AdminCmd.ACHelper;
 import be.Balor.bukkit.AdminCmd.ACPluginManager;
 import be.Balor.bukkit.AdminCmd.ConfigEnum;
 import be.Balor.bukkit.AdminCmd.LocaleHelper;
+import java.util.HashMap;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * @author Balor (aka Antoine Aflalo)
@@ -78,7 +78,7 @@ public class BanPlayer extends PlayerCommand {
 			String message = null;
 			String banPlayerString;
 			if (toBan != null) {
-				banPlayerString = toBan.getName();
+				banPlayerString = toBan.getUniqueId().toString();
 				if (!Immunity.checkImmunity(sender, toBan)) {
 					LocaleManager.sI18n(sender, "insufficientLvl");
 					return;
@@ -90,6 +90,7 @@ public class BanPlayer extends PlayerCommand {
 					LocaleManager.sI18n(sender, "insufficientLvl");
 					return;
 				}
+                                banPlayerString = acPlayer.getUuid().toString();
 			}
 			Integer tmpBan = null;
 			if (args.length >= 2) {
@@ -155,7 +156,8 @@ public class BanPlayer extends PlayerCommand {
 					}
 					toDo = new TempBannedIP(banPlayerString, message, tmpBan * 60);
 				} else {
-					toDo = new TempBannedPlayer(banPlayerString, message, tmpBan * 60);
+                                        OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(banPlayerString);
+					toDo = new TempBannedPlayer(op.getUniqueId().toString(), message, tmpBan * 60);
 				}
 				DebugLog.addInfo("Banned for : " + ((ITempBan) toDo).getReadableTimeLeft());
 
@@ -170,7 +172,8 @@ public class BanPlayer extends PlayerCommand {
 					}
 					toDo = new BannedIP(banPlayerString, message);
 				} else {
-					toDo = new BannedPlayer(banPlayerString, message);
+                                        OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(banPlayerString);
+					toDo = new BannedPlayer(op.getUniqueId().toString(), message);
 				}
 			}
 			if (!Users.isPlayer(sender, false)) {
@@ -191,7 +194,7 @@ public class BanPlayer extends PlayerCommand {
 	 * @return
 	 */
 	private String parseMessage(final CommandArgs args, String message, final boolean tempBan, final CommandSender sender) {
-		if (message == null || (message != null && message.isEmpty())) {
+		if (message == null || message.isEmpty()) {
 			message = "";
 			if (tempBan) {
 				for (int i = 1; i < args.length; i++) {
@@ -233,6 +236,7 @@ public class BanPlayer extends PlayerCommand {
 		}
 		return null;
 	}
+
 
 	/*
 	 * (non-Javadoc)

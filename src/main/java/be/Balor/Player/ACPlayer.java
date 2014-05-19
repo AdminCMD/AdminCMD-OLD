@@ -91,6 +91,17 @@ public abstract class ACPlayer {
 	public static synchronized ACPlayer getPlayer(final Player player) {
 		return PlayerManager.getInstance().demandACPlayer(player);
 	}
+        
+        /**
+	 * Get an instance of the wanted player
+	 * 
+	 * @param player
+	 *            uuid of player
+	 * @return
+	 */
+	public static synchronized ACPlayer getPlayer(final UUID player) {
+		return PlayerManager.getInstance().demandACPlayer(player);
+	}
 
 	/**
 	 * Get all player having the select power
