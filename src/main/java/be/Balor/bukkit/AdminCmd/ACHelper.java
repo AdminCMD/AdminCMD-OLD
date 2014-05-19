@@ -70,12 +70,14 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -111,7 +113,7 @@ public class ACHelper {
         static void killInstance() {
                 final String dbWrap = ConfigEnum.DATA_WRAPPER.getString();
                 if (dbWrap.equalsIgnoreCase("mysql")
-                                || dbWrap.equalsIgnoreCase("sqlite")) {
+                        || dbWrap.equalsIgnoreCase("sqlite")) {
                         Database.DATABASE.close();
                 } else {
                         FilePlayer.forceSaveList();
@@ -129,18 +131,18 @@ public class ACHelper {
         private List<String> groups;
         private AdminCmd coreInstance;
         private final ConcurrentMap<String, MaterialContainer> alias = new MapMaker()
-                        .makeMap();
+                .makeMap();
         private Map<String, KitInstance> kits = new HashMap<String, KitInstance>();
-        private Map<String, String> deathMessages = new HashMap<String, String>(); 
+        private Map<String, String> deathMessages = new HashMap<String, String>();
         private final ConcurrentMap<String, IBan> bannedPlayers = new MapMaker()
-                        .makeMap();
+                .makeMap();
         private final ConcurrentMap<Player, Object> fakeQuitPlayers = new MapMaker()
-                        .makeMap();
+                .makeMap();
         private final ConcurrentMap<Player, Object> spyPlayers = new MapMaker()
-                        .makeMap();
+                .makeMap();
         private static ACHelper instance = new ACHelper();
         private final ConcurrentMap<String, Stack<Stack<BlockRemanence>>> undoQueue = new MapMaker()
-                        .makeMap();
+                .makeMap();
 
         private static long pluginStarted;
 
@@ -155,11 +157,11 @@ public class ACHelper {
                         "Gray", "Pink", "LimeGreen", "Yellow", "LightBlue", "Magenta",
                         "Orange", "White"});
                 materialsColors.put(Material.LOG,
-                                new String[]{"Oak", "Pine", "Birch"});
+                        new String[]{"Oak", "Pine", "Birch"});
                 materialsColors.put(Material.STEP, new String[]{"Stone", "Sandstone",
                         "Wooden", "Cobblestone"});
                 materialsColors.put(Material.DOUBLE_STEP,
-                                materialsColors.get(Material.STEP));
+                        materialsColors.get(Material.STEP));
         }
 
         private ExtendedConfiguration pluginConfig;
@@ -169,8 +171,8 @@ public class ACHelper {
         private boolean serverLocked = false;
 
         private final ConcurrentMap<CommandSender, Player> playersForReplyMessage = new MapMaker()
-                        .makeMap();
-       
+                .makeMap();
+
         /**
          * Ban a new player
          *
@@ -187,7 +189,7 @@ public class ACHelper {
                         list.update();
                 }
         }
-        
+
         /**
          * Add an item to the Command BlackList
          *
@@ -195,7 +197,7 @@ public class ACHelper {
          * @return
          */
         public boolean addBlackListedBlock(final CommandSender sender,
-                        final String name) {
+                final String name) {
                 final MaterialContainer m = checkMaterial(sender, name);
                 if (!m.isNull()) {
                         final ExtendedConfiguration config = fManager.getYml("blacklist");
@@ -224,12 +226,11 @@ public class ACHelper {
         /**
          * Add an item to the BlackList
          *
-         * @param name
-         * string representing the item to blacklist
+         * @param name string representing the item to blacklist
          * @return
          */
         public boolean addBlackListedItem(final CommandSender sender,
-                        final String name) {
+                final String name) {
                 final MaterialContainer m = checkMaterial(sender, name);
                 return addBlackListedItem(sender, m);
 
@@ -238,21 +239,19 @@ public class ACHelper {
         /**
          * Add an item to the BlackList
          *
-         * @param sender
-         * sender of the command
-         * @param item
-         * itemstack to blacklist
+         * @param sender sender of the command
+         * @param item itemstack to blacklist
          * @return
          */
         public boolean addBlackListedItem(final CommandSender sender,
-                        final ItemStack item) {
+                final ItemStack item) {
                 final MaterialContainer m = new MaterialContainer(item);
                 return addBlackListedItem(sender, m);
 
         }
 
         private boolean addBlackListedItem(final CommandSender sender,
-                        final MaterialContainer mat) {
+                final MaterialContainer mat) {
                 if (mat.isNull()) {
                         return false;
                 }
@@ -273,7 +272,7 @@ public class ACHelper {
                         return false;
                 }
                 LocaleManager.sI18n(sender, "addBlacklistItem", "material",
-                                mat.display());
+                        mat.display());
                 return true;
         }
 
@@ -287,7 +286,7 @@ public class ACHelper {
          * @param blocks
          */
         public void addInUndoQueue(final String player,
-                        final Stack<BlockRemanence> blocks) {
+                final Stack<BlockRemanence> blocks) {
                 if (undoQueue.containsKey(player)) {
                         undoQueue.get(player).push(blocks);
                 } else {
@@ -303,65 +302,65 @@ public class ACHelper {
                 if (locale == null) {
                         ACLogger.info("Could not read motd.txt. Using default values for the MotD!");
                         LocaleManager.getInstance().addLocale(
-                                        "MOTD",
-                                        ChatColor.GOLD + "Welcome " + ChatColor.WHITE + "%player"
-                                        + ChatColor.GOLD + ", there is currently "
-                                        + ChatColor.DARK_RED
-                                        + "%nb players connected : //n" + ChatColor.GOLD
-                                        + "%connected //n" + ChatColor.DARK_GREEN
-                                        + "You've played so far : " + ChatColor.AQUA
-                                        + "#elapsedTotalTime# //n" + ChatColor.DARK_GREEN
-                                        + "Your last login was: " + ChatColor.AQUA
-                                        + "%lastlogin", true);
+                                "MOTD",
+                                ChatColor.GOLD + "Welcome " + ChatColor.WHITE + "%player"
+                                + ChatColor.GOLD + ", there is currently "
+                                + ChatColor.DARK_RED
+                                + "%nb players connected : //n" + ChatColor.GOLD
+                                + "%connected //n" + ChatColor.DARK_GREEN
+                                + "You've played so far : " + ChatColor.AQUA
+                                + "#elapsedTotalTime# //n" + ChatColor.DARK_GREEN
+                                + "Your last login was: " + ChatColor.AQUA
+                                + "%lastlogin", true);
                 } else {
                         ACLogger.info("motd.txt loaded");
                         LocaleManager.getInstance().addLocale("MOTD",
-                                        Materials.colorParser(locale), true);
+                                Materials.colorParser(locale), true);
                 }
                 locale = fManager.getTextFile("motdNewUser.txt");
                 if (locale == null) {
                         ACLogger.info("Could not read motdNewUser.txt. Using default values for the MotDNewUser!");
                         LocaleManager.getInstance().addLocale(
-                                        "MOTDNewUser",
-                                        ChatColor.GOLD + "Welcome " + ChatColor.WHITE + "%player"
-                                        + ChatColor.GOLD + ", there is currently "
-                                        + ChatColor.DARK_RED
-                                        + "%nb players connected : //n" + ChatColor.GOLD
-                                        + "%connected //n" + ChatColor.DARK_GREEN
-                                        + "You've played so far : " + ChatColor.AQUA
-                                        + "#elapsedTotalTime#", true);
+                                "MOTDNewUser",
+                                ChatColor.GOLD + "Welcome " + ChatColor.WHITE + "%player"
+                                + ChatColor.GOLD + ", there is currently "
+                                + ChatColor.DARK_RED
+                                + "%nb players connected : //n" + ChatColor.GOLD
+                                + "%connected //n" + ChatColor.DARK_GREEN
+                                + "You've played so far : " + ChatColor.AQUA
+                                + "#elapsedTotalTime#", true);
                 } else {
                         ACLogger.info("motdNewUser.txt loaded");
                         LocaleManager.getInstance().addLocale("MOTDNewUser",
-                                        Materials.colorParser(locale), true);
+                                Materials.colorParser(locale), true);
                 }
                 locale = fManager.getTextFile("news.txt");
                 if (locale == null) {
                         ACLogger.info("Could not read news.txt. Using default values for the MotD!");
                         LocaleManager
-                                        .getInstance()
-                                        .addLocale(
-                                                        "NEWS",
-                                                        ChatColor.DARK_GREEN
-                                                        + "News : AdminCmd Plugin has been installed",
-                                                        true);
+                                .getInstance()
+                                .addLocale(
+                                        "NEWS",
+                                        ChatColor.DARK_GREEN
+                                        + "News : AdminCmd Plugin has been installed",
+                                        true);
                 } else {
                         ACLogger.info("news.txt loaded");
                         LocaleManager.getInstance().addLocale("NEWS",
-                                        Materials.colorParser(locale), true);
+                                Materials.colorParser(locale), true);
                 }
                 locale = fManager.getTextFile("rules.txt");
                 if (locale == null) {
                         ACLogger.info("Could not read motdNewUser.txt. Using default values for the MotD!");
                         LocaleManager.getInstance().addLocale(
-                                        "Rules",
-                                        "1. Do not grief! //n"
-                                        + "2. Do not use strong language! //n"
-                                        + "3. Be friendly to other players!", true);
+                                "Rules",
+                                "1. Do not grief! //n"
+                                + "2. Do not use strong language! //n"
+                                + "3. Be friendly to other players!", true);
                 } else {
                         ACLogger.info("rules.txt loaded");
                         LocaleManager.getInstance().addLocale("Rules",
-                                        Materials.colorParser(locale), true);
+                                Materials.colorParser(locale), true);
                 }
                 LocaleManager.getInstance().save();
         }
@@ -379,8 +378,8 @@ public class ACHelper {
                 this.alias.put(alias, m);
                 this.fManager.addAlias(alias, m);
                 sender.sendMessage(ChatColor.BLUE + "You can now use " + ChatColor.GOLD
-                                + alias + ChatColor.BLUE + " for the item " + ChatColor.GOLD
-                                + m.display());
+                        + alias + ChatColor.BLUE + " for the item " + ChatColor.GOLD
+                        + m.display());
                 return true;
         }
 
@@ -400,8 +399,8 @@ public class ACHelper {
                                 return false;
                         } else {
                                 ACPluginManager.getScheduler().runTaskLaterAsynchronously(
-                                                coreInstance, new UnBanTask(tempBan, true),
-                                                timeLeft / Utils.secondInMillis * Utils.secInTick);
+                                        coreInstance, new UnBanTask(tempBan, true),
+                                        timeLeft / Utils.secondInMillis * Utils.secInTick);
                                 return true;
                         }
                 } else {
@@ -416,7 +415,7 @@ public class ACHelper {
          * @return Material
          */
         public MaterialContainer checkMaterial(final CommandSender sender,
-                        final String mat) {
+                final String mat) {
                 MaterialContainer m = null;
                 try {
                         m = Materials.checkMaterial(mat);
@@ -437,18 +436,18 @@ public class ACHelper {
 
         private void convertSpawnWarp() {
                 final File spawnFile = fManager.getFile("spawn", "spawnLocations.yml",
-                                false);
+                        false);
                 if (spawnFile.exists()) {
                         final ExtendedConfiguration spawn = ExtendedConfiguration
-                                        .loadConfiguration(spawnFile);
+                                .loadConfiguration(spawnFile);
                         final ConfigurationSection spawnPoints = spawn
-                                        .getConfigurationSection("spawn");
+                                .getConfigurationSection("spawn");
                         if (spawnPoints != null) {
                                 for (final String key : spawnPoints.getKeys(false)) {
                                         try {
                                                 ACWorld.getWorld(key).setSpawn(
-                                                                fManager.getLocation("spawn." + key,
-                                                                                "spawnLocations", "spawn"));
+                                                        fManager.getLocation("spawn." + key,
+                                                                "spawnLocations", "spawn"));
                                         } catch (final WorldNotLoaded e) {
                                         }
                                 }
@@ -460,12 +459,12 @@ public class ACHelper {
                 final File warpFile = fManager.getFile("warp", "warpPoints.yml", false);
                 if (warpFile.exists()) {
                         for (final String key : fManager.getKeys("warp", "warpPoints",
-                                        "warp")) {
+                                "warp")) {
                                 try {
                                         final Location loc = fManager.getLocation("warp." + key,
-                                                        "warpPoints", "warp");
+                                                "warpPoints", "warp");
                                         ACWorld.getWorld(loc.getWorld().getName())
-                                                        .addWarp(key, loc);
+                                                .addWarp(key, loc);
                                 } catch (final WorldNotLoaded e) {
                                 }
                         }
@@ -501,7 +500,7 @@ public class ACHelper {
          */
         private List<Integer> getBlackListedBlocks() {
                 return fManager.getYml("blacklist").getIntList("BlackListedBlocks",
-                                new ArrayList<Integer>());
+                        new ArrayList<Integer>());
         }
 
         /**
@@ -512,7 +511,7 @@ public class ACHelper {
         @SuppressWarnings("unchecked")
         private Set<MaterialContainer> getBlackListedItems() {
                 return (Set<MaterialContainer>) fManager.getYml("blacklist").get(
-                                "BlackListedMaterial", new TreeSet<MaterialContainer>());
+                        "BlackListedMaterial", new TreeSet<MaterialContainer>());
         }
 
         /*
@@ -577,7 +576,7 @@ public class ACHelper {
          */
         private List<String> getGroupNames() {
                 final List<String> gFileList = fManager.getYml("config").getStringList(
-                                "groupNames", new ArrayList<String>());
+                        "groupNames", new ArrayList<String>());
                 final List<String> gNewList = new ArrayList<String>();
                 for (final String item : gFileList) {
                         gNewList.add(item.toLowerCase());
@@ -637,12 +636,12 @@ public class ACHelper {
 
         // teleports chosen player to another player
         public int getLimit(final Player player, final Type.Limit type,
-                        final String defaultLvl) {
+                final String defaultLvl) {
                 Integer limit = null;
                 final String toParse = PermissionManager.getPermissionLimit(player,
-                                type.toString());
+                        type.toString());
                 limit = toParse != null && !toParse.isEmpty() ? Integer
-                                .parseInt(toParse) : null;
+                        .parseInt(toParse) : null;
                 if (limit == null || limit == -1) {
                         limit = pluginConfig.getInt(defaultLvl, 0);
                 }
@@ -651,7 +650,7 @@ public class ACHelper {
                 }
                 return limit;
         }
-       
+
         /**
          * Get the number of kit in the system.
          *
@@ -664,8 +663,7 @@ public class ACHelper {
         /**
          * Get the player to whom the reply message is sent to.
          *
-         * @param key
-         * The player who wants to reply to a message.
+         * @param key The player who wants to reply to a message.
          * @return
          */
         public Player getReplyPlayer(final Player key) {
@@ -680,8 +678,7 @@ public class ACHelper {
          * Teleports a player to the GroupSpawn location belonging to his group
          * defined in his permission node.
          *
-         * @param player
-         * - The player who should be teleported
+         * @param player - The player who should be teleported
          * @author Lathanael
          */
         public void groupSpawn(final Player player) {
@@ -693,10 +690,9 @@ public class ACHelper {
         /**
          * Gets the spawn location of a group.
          *
-         * @param player
-         * - The player whose group is to be checked
-         * @return The {@code Location} of the Spawn or the worlds spawn if none is
-         * found.
+         * @param player - The player whose group is to be checked
+         * @return The {@code Location} of the Spawn or the worlds spawn if none
+         * is found.
          * @author Lathanael
          */
         public Location getGroupSpawnLocation(final Player player) {
@@ -711,7 +707,7 @@ public class ACHelper {
                 }
                 for (final String groupName : groups) {
                         if (PermissionManager.hasPerm(player, "admincmd.respawn."
-                                        + groupName)) {
+                                + groupName)) {
                                 loc = acWorld.getGroupSpawn(groupName);
                                 break;
                         }
@@ -723,9 +719,9 @@ public class ACHelper {
         }
 
         public boolean inBlackListBlock(final CommandSender sender,
-                        final ItemStack mat) {
+                final ItemStack mat) {
                 if (!PermissionManager.hasPerm(sender, "admincmd.spec.noblacklist",
-                                false) && blockBlacklist.contains(mat.getTypeId())) {
+                        false) && blockBlacklist.contains(mat.getTypeId())) {
                         final HashMap<String, String> replace = new HashMap<String, String>();
                         replace.put("material", mat.getType().toString());
                         LocaleManager.sI18n(sender, "inBlacklistBlock", replace);
@@ -735,9 +731,9 @@ public class ACHelper {
         }
 
         public boolean inBlackListBlock(final CommandSender sender,
-                        final MaterialContainer mat) {
+                final MaterialContainer mat) {
                 if (!PermissionManager.hasPerm(sender, "admincmd.spec.noblacklist",
-                                false) && blockBlacklist.contains(mat.getMaterial().getId())) {
+                        false) && blockBlacklist.contains(mat.getMaterial().getId())) {
                         final HashMap<String, String> replace = new HashMap<String, String>();
                         replace.put("material", mat.display());
                         LocaleManager.sI18n(sender, "inBlacklistBlock", replace);
@@ -747,14 +743,14 @@ public class ACHelper {
         }
 
         public boolean inBlackListItem(final CommandSender sender,
-                        final ItemStack mat) {
+                final ItemStack mat) {
                 return inBlackListItem(sender, new MaterialContainer(mat));
         }
 
         public boolean inBlackListItem(final CommandSender sender,
-                        final MaterialContainer mat) {
+                final MaterialContainer mat) {
                 if (PermissionManager.hasPerm(sender, "admincmd.spec.noblacklist",
-                                false)) {
+                        false)) {
                         return false;
                 }
                 if (!itemBlacklist.contains(mat)) {
@@ -778,7 +774,7 @@ public class ACHelper {
                 CommandManager.createInstance().setCorePlugin(coreInstance);
                 if (pluginConfig.get("pluginStarted") != null) {
                         pluginStarted = Long.parseLong(pluginConfig
-                                        .getString("pluginStarted"));
+                                .getString("pluginStarted"));
                         pluginConfig.remove("pluginStarted");
                         try {
                                 pluginConfig.save();
@@ -787,6 +783,7 @@ public class ACHelper {
                 } else {
                         pluginStarted = System.currentTimeMillis();
                 }
+                                              
                 for (final Player p : coreInstance.getServer().getOnlinePlayers()) {
                         PlayerManager.getInstance().setOnline(p);
                 }
@@ -807,33 +804,33 @@ public class ACHelper {
          */
         private void initLocale() {
                 final ExtendedConfiguration localeFile = ExtendedConfiguration
-                                .loadConfiguration(new File(coreInstance.getDataFolder(),
-                                                                "locales" + File.separator
-                                                                + pluginConfig.getString("locale", "en_US")
-                                                                + ".yml"));
+                        .loadConfiguration(new File(coreInstance.getDataFolder(),
+                                        "locales" + File.separator
+                                        + pluginConfig.getString("locale", "en_US")
+                                        + ".yml"));
                 final ExtendedConfiguration defaultLocale = ExtendedConfiguration
-                                .loadConfiguration(fManager.getInnerFile("default_locale.yml",
-                                                                "locales", true));
+                        .loadConfiguration(fManager.getInnerFile("default_locale.yml",
+                                        "locales", true));
                 final Properties props = new Properties();
                 try {
                         props.load(this.getClass().getResourceAsStream("/git.properties"));
                 } catch (final IOException e1) {
                 }
                 defaultLocale.options()
-                                .header("version: " + props.getProperty("git.commit.id"))
-                                .copyHeader(true);
+                        .header("version: " + props.getProperty("git.commit.id"))
+                        .copyHeader(true);
                 localeFile.setDefaults(defaultLocale);
                 localeFile.options().copyHeader(false);
                 LocaleManager.getInstance().addLocaleFile(LocaleManager.DEFAULT_LOCALE,
-                                defaultLocale);
+                        defaultLocale);
                 LocaleManager.getInstance().addLocaleFile(LocaleManager.PRIMARY_LOCALE,
-                                localeFile);
+                        localeFile);
                 LocaleManager.getInstance().addLocaleFile(
-                                "kickMessages",
-                                ExtendedConfiguration.loadConfiguration(fManager.getInnerFile(
-                                                                "kickMessages.yml", "locales", false)));
+                        "kickMessages",
+                        ExtendedConfiguration.loadConfiguration(fManager.getInnerFile(
+                                        "kickMessages.yml", "locales", false)));
                 LocaleManager.getInstance().setNoMsg(
-                                pluginConfig.getBoolean("noMessage", false));
+                        pluginConfig.getBoolean("noMessage", false));
         }
 
         /**
@@ -842,25 +839,25 @@ public class ACHelper {
         private void initAutoAfk() {
                 if (pluginConfig.getBoolean("autoAfk", true)) {
                         AFKWorker.getInstance().setAfkTime(
-                                        pluginConfig.getInt("afkTimeInSecond", 60));
+                                pluginConfig.getInt("afkTimeInSecond", 60));
                         AFKWorker.getInstance().setKickTime(
-                                        pluginConfig.getInt("afkKickInMinutes", 3));
+                                pluginConfig.getInt("afkKickInMinutes", 3));
 
                         this.coreInstance
-                                        .getServer()
-                                        .getScheduler()
-                                        .runTaskTimerAsynchronously(this.coreInstance,
-                                                        AFKWorker.getInstance().getAfkChecker(), 0,
-                                                        pluginConfig.getInt("statutCheckInSec", 20) * 20);
+                                .getServer()
+                                .getScheduler()
+                                .runTaskTimerAsynchronously(this.coreInstance,
+                                        AFKWorker.getInstance().getAfkChecker(), 0,
+                                        pluginConfig.getInt("statutCheckInSec", 20) * 20);
                         if (pluginConfig.getBoolean("autoKickAfkPlayer", false)) {
                                 this.coreInstance
-                                                .getServer()
-                                                .getScheduler()
-                                                .runTaskTimerAsynchronously(
-                                                                this.coreInstance,
-                                                                AFKWorker.getInstance().getKickChecker(),
-                                                                0,
-                                                                pluginConfig.getInt("statutCheckInSec", 20) * 20);
+                                        .getServer()
+                                        .getScheduler()
+                                        .runTaskTimerAsynchronously(
+                                                this.coreInstance,
+                                                AFKWorker.getInstance().getKickChecker(),
+                                                0,
+                                                pluginConfig.getInt("statutCheckInSec", 20) * 20);
                         }
                 }
         }
@@ -868,8 +865,7 @@ public class ACHelper {
         /**
          * Return the ban of the player
          *
-         * @param player
-         * player's uuid
+         * @param player player's uuid
          * @return the ban if the player have one, else return null
          */
         public IBan getBan(final String player) {
@@ -889,13 +885,13 @@ public class ACHelper {
                         // help?
                         if (color.equalsIgnoreCase("help")) {
                                 sender.sendMessage(ChatColor.RED + "Wool: " + ChatColor.WHITE
-                                                + printColors(Material.WOOL));
+                                        + printColors(Material.WOOL));
                                 sender.sendMessage(ChatColor.RED + "Dyes: " + ChatColor.WHITE
-                                                + printColors(Material.INK_SACK));
+                                        + printColors(Material.INK_SACK));
                                 sender.sendMessage(ChatColor.RED + "Logs: " + ChatColor.WHITE
-                                                + printColors(Material.LOG));
+                                        + printColors(Material.LOG));
                                 sender.sendMessage(ChatColor.RED + "Slab: " + ChatColor.WHITE
-                                                + printColors(Material.STEP));
+                                        + printColors(Material.STEP));
                                 return true;
                         }
                         // determine the value based on what you're holding
@@ -906,14 +902,14 @@ public class ACHelper {
                                 value = getColor(color, m);
                         } else {
                                 sender.sendMessage(ChatColor.RED
-                                                + "You must hold a colorable material!");
+                                        + "You must hold a colorable material!");
                                 return true;
                         }
                         // error?
                         if (value < 0) {
                                 sender.sendMessage(ChatColor.RED + "Color " + ChatColor.WHITE
-                                                + color + ChatColor.RED
-                                                + " is not usable for what you're holding!");
+                                        + color + ChatColor.RED
+                                        + " is not usable for what you're holding!");
                                 return true;
                         }
 
@@ -971,7 +967,7 @@ public class ACHelper {
         private boolean isSqlWrapper() {
                 final String dWrapper = ConfigEnum.DATA_WRAPPER.getString();
                 return dWrapper.equalsIgnoreCase("mysql")
-                                || dWrapper.equalsIgnoreCase("sqlite");
+                        || dWrapper.equalsIgnoreCase("sqlite");
         }
 
         /**
@@ -1001,7 +997,7 @@ public class ACHelper {
 
                 loadInfos();
                 for (final Player p : InvisibleWorker.getInstance()
-                                .getAllInvisiblePlayers()) {
+                        .getAllInvisiblePlayers()) {
                         InvisibleWorker.getInstance().reappear(p);
                 }
                 InvisibleWorker.killInstance();
@@ -1015,7 +1011,7 @@ public class ACHelper {
                 CommandManager.getInstance().checkAlias(coreInstance);
                 if (ConfigEnum.H_ALLPLUGIN.getBoolean()) {
                         for (final Plugin plugin : coreInstance.getServer()
-                                        .getPluginManager().getPlugins()) {
+                                .getPluginManager().getPlugins()) {
                                 HelpLister.getInstance().addPlugin(plugin);
                         }
                 }
@@ -1033,12 +1029,12 @@ public class ACHelper {
          * @return
          */
         public boolean removeBlackListedBlock(final CommandSender sender,
-                        final String name) {
+                final String name) {
                 final MaterialContainer m = checkMaterial(sender, name);
                 if (!m.isNull()) {
                         final ExtendedConfiguration config = fManager.getYml("blacklist");
                         final List<Integer> list = config.getIntList("BlackListedBlocks",
-                                        new ArrayList<Integer>());
+                                new ArrayList<Integer>());
                         if (!list.isEmpty() && list.contains(m.getMaterial().getId())) {
                                 list.remove((Integer) m.getMaterial().getId());
                                 config.set("BlackListedBlocks", list);
@@ -1048,7 +1044,7 @@ public class ACHelper {
                                 }
                         }
                         if (itemBlacklist != null && !itemBlacklist.isEmpty()
-                                        && itemBlacklist.contains(m.getMaterial().getId())) {
+                                && itemBlacklist.contains(m.getMaterial().getId())) {
                                 itemBlacklist.remove(m.getMaterial().getId());
                         }
                         final HashMap<String, String> replace = new HashMap<String, String>();
@@ -1059,18 +1055,15 @@ public class ACHelper {
                 return false;
         }
 
-       
         /**
          * remove a black listed item
          *
-         * @param sender
-         * sender of the command
-         * @param name
-         * string used to determine the material to blacklist
+         * @param sender sender of the command
+         * @param name string used to determine the material to blacklist
          * @return
          */
         public boolean removeBlackListedItem(final CommandSender sender,
-                        final String name) {
+                final String name) {
                 final MaterialContainer m = checkMaterial(sender, name);
                 return removeBlackListedItem(sender, m);
         }
@@ -1078,20 +1071,18 @@ public class ACHelper {
         /**
          * remove a black listed item
          *
-         * @param sender
-         * sender of the command
-         * @param item
-         * itemstack to remove from the blackList
+         * @param sender sender of the command
+         * @param item itemstack to remove from the blackList
          * @return
          */
         public boolean removeBlackListedItem(final CommandSender sender,
-                        final ItemStack item) {
+                final ItemStack item) {
                 final MaterialContainer m = new MaterialContainer(item);
                 return removeBlackListedItem(sender, m);
         }
 
         private boolean removeBlackListedItem(final CommandSender sender,
-                        final MaterialContainer mat) {
+                final MaterialContainer mat) {
                 if (mat.isNull()) {
                         return false;
                 }
@@ -1166,8 +1157,7 @@ public class ACHelper {
         }
 
         /**
-         * @param pluginInstance
-         * the pluginInstance to set
+         * @param pluginInstance the pluginInstance to set
          */
         public void setCoreInstance(final AdminCmd pluginInstance) {
                 mainThreadID = Thread.currentThread().getId();
@@ -1194,12 +1184,12 @@ public class ACHelper {
                 final ExtendedConfiguration config = ConfigEnum.getConfig();
                 if (config.isBoolean("fakeQuitWhenInvisible")) {
                         ConfigEnum.INVISIBLE_FAKEQUIT.setValue(config
-                                        .getBoolean("fakeQuitWhenInvisible"));
+                                .getBoolean("fakeQuitWhenInvisible"));
                         config.remove("fakeQuitWhenInvisible");
                 }
                 if (config.isBoolean("InvisAndNoPickup")) {
                         ConfigEnum.INVISIBLE_NOPICKUP.setValue(config
-                                        .getBoolean("InvisAndNoPickup"));
+                                .getBoolean("InvisAndNoPickup"));
                         config.remove("InvisAndNoPickup");
                 }
 
@@ -1231,7 +1221,7 @@ public class ACHelper {
                 }
                 if (pluginConfig.get("prioritizedCommands", null) != null) {
                         priority = pluginConfig.getStringList("prioritizedCommands",
-                                        priority);
+                                priority);
                         pluginConfig.remove("prioritizedCommands");
                 }
                 if (pluginConfig.get("respawnAtSpawnPoint", null) != null) {
@@ -1239,8 +1229,8 @@ public class ACHelper {
                 }
 
                 final ExtendedConfiguration commands = ExtendedConfiguration
-                                .loadConfiguration(new File(coreInstance.getDataFolder(),
-                                                                "commands.yml"));
+                        .loadConfiguration(new File(coreInstance.getDataFolder(),
+                                        "commands.yml"));
                 final StringBuffer buffer = new StringBuffer();
                 buffer.append("disabledCommands: \t\t put here the AdminCmd command you want to disable. Any alias will work.\n");
                 buffer.append("prioritizedCommands: \t\t commands that you want AdminCmd to take over any other plugins.\n");
@@ -1249,9 +1239,9 @@ public class ACHelper {
                 commands.options().copyHeader(true).header(buffer.toString());
                 commands.add("disabledCommands", disabled);
                 commands.add(
-                                "prioritizedCommands",
-                                priority.isEmpty() ? Arrays.asList("reload", "/", "stop", "pl",
-                                                "plugins") : priority);
+                        "prioritizedCommands",
+                        priority.isEmpty() ? Arrays.asList("reload", "/", "stop", "pl",
+                                "plugins") : priority);
 
                 if (commands.getConfigurationSection("aliases") == null) {
                         final ExConfigurationSection aliases = commands.addSection("aliases");
@@ -1287,7 +1277,7 @@ public class ACHelper {
         private void initEssentialImporter() {
                 if (ConfigEnum.IMPORT_ESSENTIALS.getBoolean()) {
                         final IImport importer = new EssentialsImport(
-                                        ImportTools.getPluginsFolder(coreInstance.getDataFolder()));
+                                ImportTools.getPluginsFolder(coreInstance.getDataFolder()));
                         importer.initImport();
                 }
         }
@@ -1298,10 +1288,10 @@ public class ACHelper {
         private void initUpdateChecker() {
                 if (ConfigEnum.CHECK_UPDATE.getBoolean()) {
                         final Channel channel = ConfigEnum.UPDATE_SRC.getString()
-                                        .equalsIgnoreCase("stable") ? Channel.STABLE : Channel.BETA;
+                                .equalsIgnoreCase("stable") ? Channel.STABLE : Channel.BETA;
                         new UpdateChecker(channel, coreInstance);
                         final Graph updateChannelGraph = coreInstance.getMetrics()
-                                        .createGraph("Update Channels");
+                                .createGraph("Update Channels");
                         updateChannelGraph.addPlotter(new UpdateChannelPlotter(channel));
                 }
         }
@@ -1311,10 +1301,10 @@ public class ACHelper {
          */
         private void initPluginConfig(final AdminCmd pluginInstance) {
                 pluginConfig = ExtendedConfiguration.loadConfiguration(new File(
-                                coreInstance.getDataFolder(), "config.yml"));
+                        coreInstance.getDataFolder(), "config.yml"));
                 TextLocale.setVersion(ExtendedConfiguration.loadConfiguration(new File(
-                                new File(coreInstance.getDataFolder(), "locales"),
-                                "textFile.yml")));
+                        new File(coreInstance.getDataFolder(), "locales"),
+                        "textFile.yml")));
                 ConfigEnum.setPluginInfos(pluginInstance.getDescription());
                 ConfigEnum.setConfig(pluginConfig);
         }
@@ -1336,24 +1326,22 @@ public class ACHelper {
                 fManager.getInnerFile("de_DE.yml", "locales", true);
                 fManager.getInnerFile("ru_RU.yml", "locales", true);
                 fManager.getInnerFile("AdminCmd.yml", "HelpFiles" + File.separator
-                                + "AdminCmd", true);
+                        + "AdminCmd", true);
         }
 
         /**
-         * Put a player into the Map, so that the message reciever can use /reply
+         * Put a player into the Map, so that the message reciever can use
+         * /reply
          *
-         * @param key
-         * The Player to whom the message is send.
-         * @param value
-         * The Player who sent the message.
+         * @param key The Player to whom the message is send.
+         * @param value The Player who sent the message.
          */
         public void setReplyPlayer(final CommandSender key, final Player value) {
                 playersForReplyMessage.put(key, value);
         }
 
         /**
-         * @param serverLocked
-         * the serverLocked to set
+         * @param serverLocked the serverLocked to set
          */
         public void setServerLocked(final boolean serverLocked) {
                 this.serverLocked = serverLocked;
@@ -1370,7 +1358,7 @@ public class ACHelper {
                                 @Override
                                 public void run() {
                                         w.setSpawnLocation(loc.getBlockX(), loc.getBlockY(),
-                                                        loc.getBlockZ());
+                                                loc.getBlockZ());
                                 }
                         });
 
@@ -1415,7 +1403,7 @@ public class ACHelper {
         }
 
         public int undoLastModification(final String player)
-                        throws EmptyStackException {
+                throws EmptyStackException {
                 if (!undoQueue.containsKey(player)) {
                         throw new EmptyStackException();
                 }
@@ -1431,7 +1419,7 @@ public class ACHelper {
                                 undoCache.push(undo.pop());
                                 if (undoCache.size() == Utils.MAX_BLOCKS) {
                                         ACPluginManager.getScheduler().scheduleSyncDelayedTask(
-                                                        coreInstance, new UndoBlockTask(undoCache), 1);
+                                                coreInstance, new UndoBlockTask(undoCache), 1);
                                 }
                                 i++;
                         }
@@ -1441,7 +1429,7 @@ public class ACHelper {
                         return i;
                 } finally {
                         ACPluginManager.getScheduler().scheduleSyncDelayedTask(
-                                        coreInstance, new UndoBlockTask(undoCache), 1);
+                                coreInstance, new UndoBlockTask(undoCache), 1);
                 }
                 return i;
         }
@@ -1455,26 +1443,27 @@ public class ACHelper {
                         try {
                                 createTable();
                                 PlayerManager.getInstance().setPlayerFactory(
-                                                new SQLPlayerFactory());
+                                        new SQLPlayerFactory());
                                 WorldManager.getInstance().setWorldFactory(
-                                                new SQLWorldFactory());
+                                        new SQLWorldFactory());
                         } catch (final SQLException e) {
                                 PlayerManager.getInstance().setPlayerFactory(
-                                                new FilePlayerFactory(coreInstance.getDataFolder()
-                                                                .getPath() + File.separator + "userData"));
+                                        new FilePlayerFactory(coreInstance.getDataFolder()
+                                                .getPath() + File.separator + "userData"));
                                 WorldManager.getInstance().setWorldFactory(
-                                                new FileWorldFactory(coreInstance.getDataFolder()
-                                                                .getPath() + File.separator + "worldData"));
+                                        new FileWorldFactory(coreInstance.getDataFolder()
+                                                .getPath() + File.separator + "worldData"));
                                 return;
                         }
 
                 } else {
+                        convertFiles();
                         PlayerManager.getInstance().setPlayerFactory(
-                                        new FilePlayerFactory(coreInstance.getDataFolder()
-                                                        .getPath() + File.separator + "userData"));
+                                new FilePlayerFactory(coreInstance.getDataFolder()
+                                        .getPath() + File.separator + "userData"));
                         WorldManager.getInstance().setWorldFactory(
-                                        new FileWorldFactory(coreInstance.getDataFolder().getPath()
-                                                        + File.separator + "worldData"));
+                                new FileWorldFactory(coreInstance.getDataFolder().getPath()
+                                        + File.separator + "worldData"));
                 }
                 convertFactory();
         }
@@ -1484,212 +1473,216 @@ public class ACHelper {
                         final Database db = Database.DATABASE;
                         db.open();
                         updatePlayerTable(db);
-                        if (!db.checkTable("ac_players_new") && !db.checkTable("ac_worlds")) {
-                                // Mysql
-                                if (db.getType() == DatabaseType.MYSQL) {
-                                        // Players
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_homes` ("
-                                                        + "  `name` varchar(64) BINARY NOT NULL,"
-                                                        + "  `player_id` int(10) unsigned NOT NULL,"
-                                                        + "  `world` varchar(64) NOT NULL,"
-                                                        + "  `x` double NOT NULL,"
-                                                        + "  `y` double NOT NULL,"
-                                                        + "  `z` double NOT NULL,"
-                                                        + "  `yaw` double NOT NULL,"
-                                                        + "  `pitch` double NOT NULL,"
-                                                        + "  PRIMARY KEY (`name`,`player_id`),"
-                                                        + "  KEY `player_id` (`player_id`)"
-                                                        + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_informations` ("
-                                                        + "  `key` varchar(128) NOT NULL,"
-                                                        + "  `player_id` int(10) unsigned NOT NULL,"
-                                                        + "  `info` text NOT NULL,"
-                                                        + "  PRIMARY KEY (`key`,`player_id`),"
-                                                        + "  KEY `player_id` (`player_id`)"
-                                                        + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_kit_uses` ("
-                                                        + "  `kit` varchar(64) NOT NULL,"
-                                                        + "  `player_id` int(10) unsigned NOT NULL,"
-                                                        + "  `use` BIGINT unsigned NOT NULL,"
-                                                        + "  PRIMARY KEY (`kit`,`player_id`),"
-                                                        + "  KEY `player_id` (`player_id`)"
-                                                        + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_players_new` ("
-                                                        + "  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
-                                                        + "  `uuid` varchar(64) BINARY NOT NULL,"
-                                                        + "  `world` varchar(64) DEFAULT NULL,"
-                                                        + "  `x` double DEFAULT NULL,"
-                                                        + "  `y` double DEFAULT NULL,"
-                                                        + "  `z` double DEFAULT NULL,"
-                                                        + "  `yaw` double DEFAULT NULL,"
-                                                        + "  `pitch` double DEFAULT NULL,"
-                                                        + "  PRIMARY KEY (`id`),"
-                                                        + "  UNIQUE KEY `uuid` (`uuid`)"
-                                                        + ")ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_powers` ("
-                                                        + "  `key` varchar(128) NOT NULL,"
-                                                        + "  `player_id` int(10) unsigned NOT NULL,"
-                                                        + "  `info` text NOT NULL,"
-                                                        + "  `category` varchar(64) NOT NULL,"
-                                                        + "  PRIMARY KEY (`key`,`player_id`),"
-                                                        + "  KEY `player_id` (`player_id`),"
-                                                        + "  KEY `category` (`category`)"
-                                                        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-                                        db.createTable("ALTER TABLE `ac_homes`"
-                                                        + "  ADD CONSTRAINT `ac_homes_ibfk_1` FOREIGN KEY (`player_id`) "
-                                                        + "REFERENCES `ac_players_new` (`id`) "
-                                                        + "ON DELETE CASCADE ON UPDATE CASCADE;");
-                                        db.createTable("ALTER TABLE `ac_informations`"
-                                                        + "  ADD CONSTRAINT `ac_informations_ibfk_1`"
-                                                        + "  FOREIGN KEY (`player_id`) "
-                                                        + "  REFERENCES `ac_players_new` (`id`)"
-                                                        + "  ON DELETE CASCADE ON UPDATE CASCADE;");
-                                        db.createTable("ALTER TABLE `ac_kit_uses`"
-                                                        + "  ADD CONSTRAINT `ac_kit_uses_ibfk_1`"
-                                                        + "  FOREIGN KEY (`player_id`)"
-                                                        + "  REFERENCES `ac_players_new` (`id`)"
-                                                        + "  ON DELETE CASCADE ON UPDATE CASCADE;");
-                                        db.createTable("ALTER TABLE `ac_powers`"
-                                                        + "  ADD CONSTRAINT `ac_powers_ibfk_1`"
-                                                        + "  FOREIGN KEY (`player_id`)"
-                                                        + "  REFERENCES `ac_players_new` (`id`)"
-                                                        + "  ON DELETE CASCADE ON UPDATE CASCADE;");
 
-                                        // Worlds
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_warps` ("
-                                                        + "  `name` varchar(64) BINARY NOT NULL,"
-                                                        + "  `world_id` int(10) unsigned NOT NULL,"
-                                                        + "  `x` double NOT NULL,"
-                                                        + "  `y` double NOT NULL,"
-                                                        + "  `z` double NOT NULL,"
-                                                        + "  `pitch` double NOT NULL,"
-                                                        + "  `yaw` double NOT NULL,"
-                                                        + "  PRIMARY KEY (`name`,`world_id`),"
-                                                        + "  KEY `world_id` (`world_id`)"
-                                                        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_worlds` ("
-                                                        + "  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
-                                                        + "  `name` varchar(64) BINARY NOT NULL,"
-                                                        + "  PRIMARY KEY (`id`),"
-                                                        + "  UNIQUE KEY `name` (`name`)"
-                                                        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_w_infos` ("
-                                                        + "  `key` varchar(64) NOT NULL,"
-                                                        + "  `world_id` int(10) unsigned NOT NULL,"
-                                                        + "  `info` text NOT NULL,"
-                                                        + "  PRIMARY KEY (`key`,`world_id`),"
-                                                        + "  KEY `world_id` (`world_id`)"
-                                                        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_spawns` ("
-                                                        + " `name` varchar(64) BINARY NOT NULL,"
-                                                        + "  `world_id` int(10) unsigned NOT NULL,"
-                                                        + "  `x` double NOT NULL,"
-                                                        + "  `y` double NOT NULL,"
-                                                        + "  `z` double NOT NULL,"
-                                                        + "  `pitch` double NOT NULL,"
-                                                        + "  `yaw` double NOT NULL,"
-                                                        + "  PRIMARY KEY (`name`,`world_id`),"
-                                                        + "  KEY `world_id` (`world_id`)"
-                                                        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+                        // Mysql
+                        if (db.getType() == DatabaseType.MYSQL) {
+                                // Players
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_homes` ("
+                                        + "  `name` varchar(64) BINARY NOT NULL,"
+                                        + "  `player_id` int(10) unsigned NOT NULL,"
+                                        + "  `world` varchar(64) NOT NULL,"
+                                        + "  `x` double NOT NULL,"
+                                        + "  `y` double NOT NULL,"
+                                        + "  `z` double NOT NULL,"
+                                        + "  `yaw` double NOT NULL,"
+                                        + "  `pitch` double NOT NULL,"
+                                        + "  PRIMARY KEY (`name`,`player_id`),"
+                                        + "  KEY `player_id` (`player_id`)"
+                                        + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_informations` ("
+                                        + "  `key` varchar(128) NOT NULL,"
+                                        + "  `player_id` int(10) unsigned NOT NULL,"
+                                        + "  `info` text NOT NULL,"
+                                        + "  PRIMARY KEY (`key`,`player_id`),"
+                                        + "  KEY `player_id` (`player_id`)"
+                                        + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_kit_uses` ("
+                                        + "  `kit` varchar(64) NOT NULL,"
+                                        + "  `player_id` int(10) unsigned NOT NULL,"
+                                        + "  `use` BIGINT unsigned NOT NULL,"
+                                        + "  PRIMARY KEY (`kit`,`player_id`),"
+                                        + "  KEY `player_id` (`player_id`)"
+                                        + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_players_new` ("
+                                        + "  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
+                                        + "  `uuid` varchar(64) BINARY NOT NULL,"
+                                        + "  `world` varchar(64) DEFAULT NULL,"
+                                        + "  `x` double DEFAULT NULL,"
+                                        + "  `y` double DEFAULT NULL,"
+                                        + "  `z` double DEFAULT NULL,"
+                                        + "  `yaw` double DEFAULT NULL,"
+                                        + "  `pitch` double DEFAULT NULL,"
+                                        + "  PRIMARY KEY (`id`),"
+                                        + "  UNIQUE KEY `uuid` (`uuid`)"
+                                        + ")ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_powers` ("
+                                        + "  `key` varchar(128) NOT NULL,"
+                                        + "  `player_id` int(10) unsigned NOT NULL,"
+                                        + "  `info` text NOT NULL,"
+                                        + "  `category` varchar(64) NOT NULL,"
+                                        + "  PRIMARY KEY (`key`,`player_id`),"
+                                        + "  KEY `player_id` (`player_id`),"
+                                        + "  KEY `category` (`category`)"
+                                        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+                                db.createTable("ALTER TABLE `ac_homes`"
+                                        + "  ADD CONSTRAINT `ac_homes_ibfk_1` FOREIGN KEY (`player_id`) "
+                                        + "REFERENCES `ac_players_new` (`id`) "
+                                        + "ON DELETE CASCADE ON UPDATE CASCADE;");
+                                db.createTable("ALTER TABLE `ac_informations`"
+                                        + "  ADD CONSTRAINT `ac_informations_ibfk_1`"
+                                        + "  FOREIGN KEY (`player_id`) "
+                                        + "  REFERENCES `ac_players_new` (`id`)"
+                                        + "  ON DELETE CASCADE ON UPDATE CASCADE;");
+                                db.createTable("ALTER TABLE `ac_kit_uses`"
+                                        + "  ADD CONSTRAINT `ac_kit_uses_ibfk_1`"
+                                        + "  FOREIGN KEY (`player_id`)"
+                                        + "  REFERENCES `ac_players_new` (`id`)"
+                                        + "  ON DELETE CASCADE ON UPDATE CASCADE;");
+                                db.createTable("ALTER TABLE `ac_powers`"
+                                        + "  ADD CONSTRAINT `ac_powers_ibfk_1`"
+                                        + "  FOREIGN KEY (`player_id`)"
+                                        + "  REFERENCES `ac_players_new` (`id`)"
+                                        + "  ON DELETE CASCADE ON UPDATE CASCADE;");
 
-                                        db.createTable("ALTER TABLE `ac_warps`"
-                                                        + "  ADD CONSTRAINT `ac_warps_ibfk_1` "
-                                                        + "  FOREIGN KEY (`world_id`) "
-                                                        + "  REFERENCES `ac_worlds` (`id`) "
-                                                        + "  ON DELETE CASCADE ON UPDATE CASCADE;");
-                                        db.createTable("ALTER TABLE `ac_w_infos`"
-                                                        + "  ADD CONSTRAINT `ac_w_infos_ibfk_1`"
-                                                        + "  FOREIGN KEY (`world_id`)"
-                                                        + "  REFERENCES `ac_worlds` (`id`) "
-                                                        + "  ON DELETE CASCADE ON UPDATE CASCADE;");
-                                        db.createTable("ALTER TABLE `ac_spawns`"
-                                                        + "  ADD CONSTRAINT `ac_spawns_ibfk_1`"
-                                                        + "  FOREIGN KEY (`world_id`)"
-                                                        + "  REFERENCES `ac_worlds` (`id`) "
-                                                        + "  ON DELETE CASCADE ON UPDATE CASCADE;");
-                                        // SQLITE
-                                } else if (db.getType() == DatabaseType.SQLITE) {
-                                        // Players
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_homes` ("
-                                                        + "  `name` varchar(64) NOT NULL,"
-                                                        + "  `player_id` INTEGER  NOT NULL,"
-                                                        + "  `world` varchar(64) NOT NULL,"
-                                                        + "  `x` double  NOT NULL,"
-                                                        + "  `y` double  NOT NULL,"
-                                                        + "  `z` double  NOT NULL,"
-                                                        + "  `yaw` double  NOT NULL,"
-                                                        + "  `pitch` double  NOT NULL,"
-                                                        + "  PRIMARY KEY (`name`,`player_id`)" + ");");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_informations` ("
-                                                        + "  `key` varchar(128) NOT NULL,"
-                                                        + "  `player_id` INTEGER NOT NULL,"
-                                                        + "  `info` text NOT NULL,"
-                                                        + "  PRIMARY KEY (`key`,`player_id`)" + " ) ;");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_kit_uses` ("
-                                                        + "  `kit` varchar(64) NOT NULL,"
-                                                        + "  `player_id` INTEGER  NOT NULL,"
-                                                        + "  `use` INTEGER  NOT NULL,"
-                                                        + "  PRIMARY KEY (`kit`,`player_id`)" + " );");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_powers` ("
-                                                        + "  `key` varchar(128) NOT NULL,"
-                                                        + "  `player_id` INTEGER NOT NULL,"
-                                                        + "  `info` text NOT NULL,"
-                                                        + "  `category` varchar(64) NOT NULL,"
-                                                        + "  PRIMARY KEY (`key`,`player_id`)" + ");");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_players_new` ("
-                                                        + "  `id` INTEGER PRIMARY KEY AUTOINCREMENT,"
-                                                        + "  `uuid` varchar(64) NOT NULL,"
-                                                        + "  `world` varchar(64) DEFAULT NULL,"
-                                                        + "  `x` double DEFAULT NULL,"
-                                                        + "  `y` double  DEFAULT NULL,"
-                                                        + "  `z` double DEFAULT NULL,"
-                                                        + "  `yaw` double  DEFAULT NULL,"
-                                                        + "  `pitch` double  DEFAULT NULL,"
-                                                        + "  UNIQUE (`uuid`)" + ") ;");
+                                // Worlds
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_warps` ("
+                                        + "  `name` varchar(64) BINARY NOT NULL,"
+                                        + "  `world_id` int(10) unsigned NOT NULL,"
+                                        + "  `x` double NOT NULL,"
+                                        + "  `y` double NOT NULL,"
+                                        + "  `z` double NOT NULL,"
+                                        + "  `pitch` double NOT NULL,"
+                                        + "  `yaw` double NOT NULL,"
+                                        + "  PRIMARY KEY (`name`,`world_id`),"
+                                        + "  KEY `world_id` (`world_id`)"
+                                        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_worlds` ("
+                                        + "  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
+                                        + "  `name` varchar(64) BINARY NOT NULL,"
+                                        + "  PRIMARY KEY (`id`),"
+                                        + "  UNIQUE KEY `name` (`name`)"
+                                        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_w_infos` ("
+                                        + "  `key` varchar(64) NOT NULL,"
+                                        + "  `world_id` int(10) unsigned NOT NULL,"
+                                        + "  `info` text NOT NULL,"
+                                        + "  PRIMARY KEY (`key`,`world_id`),"
+                                        + "  KEY `world_id` (`world_id`)"
+                                        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_spawns` ("
+                                        + " `name` varchar(64) BINARY NOT NULL,"
+                                        + "  `world_id` int(10) unsigned NOT NULL,"
+                                        + "  `x` double NOT NULL,"
+                                        + "  `y` double NOT NULL,"
+                                        + "  `z` double NOT NULL,"
+                                        + "  `pitch` double NOT NULL,"
+                                        + "  `yaw` double NOT NULL,"
+                                        + "  PRIMARY KEY (`name`,`world_id`),"
+                                        + "  KEY `world_id` (`world_id`)"
+                                        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
-                                        db.createTable("CREATE INDEX home_pid ON ac_homes (player_id);");
-                                        db.createTable("CREATE INDEX info_pid ON ac_informations (player_id);");
-                                        db.createTable("CREATE INDEX kit_pid ON ac_kit_uses (player_id);");
-                                        db.createTable("CREATE INDEX power_pid ON ac_powers (player_id);");
-                                        db.createTable("CREATE INDEX power_cat ON ac_powers (category);");
+                                db.createTable("ALTER TABLE `ac_warps`"
+                                        + "  ADD CONSTRAINT `ac_warps_ibfk_1` "
+                                        + "  FOREIGN KEY (`world_id`) "
+                                        + "  REFERENCES `ac_worlds` (`id`) "
+                                        + "  ON DELETE CASCADE ON UPDATE CASCADE;");
+                                db.createTable("ALTER TABLE `ac_w_infos`"
+                                        + "  ADD CONSTRAINT `ac_w_infos_ibfk_1`"
+                                        + "  FOREIGN KEY (`world_id`)"
+                                        + "  REFERENCES `ac_worlds` (`id`) "
+                                        + "  ON DELETE CASCADE ON UPDATE CASCADE;");
+                                db.createTable("ALTER TABLE `ac_spawns`"
+                                        + "  ADD CONSTRAINT `ac_spawns_ibfk_1`"
+                                        + "  FOREIGN KEY (`world_id`)"
+                                        + "  REFERENCES `ac_worlds` (`id`) "
+                                        + "  ON DELETE CASCADE ON UPDATE CASCADE;");
+                                // SQLITE
+                        } else if (db.getType() == DatabaseType.SQLITE) {
+                                // Players
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_homes` ("
+                                        + "  `name` varchar(64) NOT NULL,"
+                                        + "  `player_id` INTEGER  NOT NULL,"
+                                        + "  `world` varchar(64) NOT NULL,"
+                                        + "  `x` double  NOT NULL,"
+                                        + "  `y` double  NOT NULL,"
+                                        + "  `z` double  NOT NULL,"
+                                        + "  `yaw` double  NOT NULL,"
+                                        + "  `pitch` double  NOT NULL,"
+                                        + "  PRIMARY KEY (`name`,`player_id`)" + ");");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_informations` ("
+                                        + "  `key` varchar(128) NOT NULL,"
+                                        + "  `player_id` INTEGER NOT NULL,"
+                                        + "  `info` text NOT NULL,"
+                                        + "  PRIMARY KEY (`key`,`player_id`)" + " ) ;");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_kit_uses` ("
+                                        + "  `kit` varchar(64) NOT NULL,"
+                                        + "  `player_id` INTEGER  NOT NULL,"
+                                        + "  `use` INTEGER  NOT NULL,"
+                                        + "  PRIMARY KEY (`kit`,`player_id`)" + " );");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_powers` ("
+                                        + "  `key` varchar(128) NOT NULL,"
+                                        + "  `player_id` INTEGER NOT NULL,"
+                                        + "  `info` text NOT NULL,"
+                                        + "  `category` varchar(64) NOT NULL,"
+                                        + "  PRIMARY KEY (`key`,`player_id`)" + ");");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_players_new` ("
+                                        + "  `id` INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                        + "  `uuid` varchar(64) NOT NULL,"
+                                        + "  `world` varchar(64) DEFAULT NULL,"
+                                        + "  `x` double DEFAULT NULL,"
+                                        + "  `y` double  DEFAULT NULL,"
+                                        + "  `z` double DEFAULT NULL,"
+                                        + "  `yaw` double  DEFAULT NULL,"
+                                        + "  `pitch` double  DEFAULT NULL,"
+                                        + "  UNIQUE (`uuid`)" + ") ;");
 
-                                        // Worlds
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_warps` ("
-                                                        + "  `name` varchar(64) NOT NULL,"
-                                                        + "  `world_id` INTEGER  NOT NULL,"
-                                                        + "  `x` double NOT NULL,"
-                                                        + "  `y` double NOT NULL,"
-                                                        + "  `z` double NOT NULL,"
-                                                        + "  `pitch` double NOT NULL,"
-                                                        + "  `yaw` double NOT NULL,"
-                                                        + "  PRIMARY KEY (`name`,`world_id`)" + ") ;");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_worlds` ("
-                                                        + "  `id` INTEGER PRIMARY KEY AUTOINCREMENT,"
-                                                        + "  `name` varchar(64) NOT NULL,"
-                                                        + "  UNIQUE (`name`)" + ") ;");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_w_infos` ("
-                                                        + "  `key` varchar(64) NOT NULL,"
-                                                        + "  `world_id` INTEGER NOT NULL,"
-                                                        + "  `info` text NOT NULL,"
-                                                        + "  PRIMARY KEY (`key`,`world_id`)" + ");");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_spawns` ("
-                                                        + " `name` varchar(64) NOT NULL,"
-                                                        + "  `world_id` INTEGER NOT NULL,"
-                                                        + "  `x` double NOT NULL,"
-                                                        + "  `y` double NOT NULL,"
-                                                        + "  `z` double NOT NULL,"
-                                                        + "  `pitch` double NOT NULL,"
-                                                        + "  `yaw` double NOT NULL,"
-                                                        + "  PRIMARY KEY (`name`,`world_id`)" + ") ");
+                                db.createTable("CREATE INDEX IF NOT EXISTS home_pid ON ac_homes (player_id);");
+                                db.createTable("CREATE INDEX IF NOT EXISTS info_pid ON ac_informations (player_id);");
+                                db.createTable("CREATE INDEX IF NOT EXISTS kit_pid ON ac_kit_uses (player_id);");
+                                db.createTable("CREATE INDEX IF NOT EXISTS power_pid ON ac_powers (player_id);");
+                                db.createTable("CREATE INDEX IF NOT EXISTS power_cat ON ac_powers (category);");
 
-                                        db.createTable("CREATE INDEX warp_wid ON ac_warps (world_id);");
-                                        db.createTable("CREATE INDEX info_wid ON ac_w_infos (world_id);");
-                                        db.createTable("CREATE INDEX spawn_wid ON ac_spawns (world_id);");
-                                }
+                                // Worlds
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_warps` ("
+                                        + "  `name` varchar(64) NOT NULL,"
+                                        + "  `world_id` INTEGER  NOT NULL,"
+                                        + "  `x` double NOT NULL,"
+                                        + "  `y` double NOT NULL,"
+                                        + "  `z` double NOT NULL,"
+                                        + "  `pitch` double NOT NULL,"
+                                        + "  `yaw` double NOT NULL,"
+                                        + "  PRIMARY KEY (`name`,`world_id`)" + ") ;");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_worlds` ("
+                                        + "  `id` INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                        + "  `name` varchar(64) NOT NULL,"
+                                        + "  UNIQUE (`name`)" + ") ;");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_w_infos` ("
+                                        + "  `key` varchar(64) NOT NULL,"
+                                        + "  `world_id` INTEGER NOT NULL,"
+                                        + "  `info` text NOT NULL,"
+                                        + "  PRIMARY KEY (`key`,`world_id`)" + ");");
+                                db.createTable("CREATE TABLE IF NOT EXISTS `ac_spawns` ("
+                                        + " `name` varchar(64) NOT NULL,"
+                                        + "  `world_id` INTEGER NOT NULL,"
+                                        + "  `x` double NOT NULL,"
+                                        + "  `y` double NOT NULL,"
+                                        + "  `z` double NOT NULL,"
+                                        + "  `pitch` double NOT NULL,"
+                                        + "  `yaw` double NOT NULL,"
+                                        + "  PRIMARY KEY (`name`,`world_id`)" + ") ");
+
+                                db.createTable("CREATE INDEX IF NOT EXISTS warp_wid ON ac_warps (world_id);");
+                                db.createTable("CREATE INDEX IF NOT EXISTS info_wid ON ac_w_infos (world_id);");
+                                db.createTable("CREATE INDEX IF NOT EXISTS spawn_wid ON ac_spawns (world_id);");
                         }
+
+                        if (!convertDatabase(db)) {
+                                ACLogger.severe("Could not convert the ac_players table!");
+                        }
+
                 } catch (final SQLException e) {
                         ACLogger.severe("There is a problem in your SQL configuration : ",
-                                        e);
+                                e);
                         ACLogger.warning("The plugin is falling back to YML data managment");
                         throw e;
                 }
@@ -1702,21 +1695,105 @@ public class ACHelper {
         private void updatePlayerTable(final Database db) throws SQLException {
                 if (db.getType() == DatabaseType.MYSQL && db.checkTable("ac_players")) {
                         final PreparedStatement stmt = db.prepare("SELECT COLLATION_NAME "
-                                        + "FROM INFORMATION_SCHEMA.COLUMNS "
-                                        + "WHERE COLUMN_NAME =  ? " + "AND TABLE_NAME = ?");
+                                + "FROM INFORMATION_SCHEMA.COLUMNS "
+                                + "WHERE COLUMN_NAME =  ? " + "AND TABLE_NAME = ?");
                         stmt.setString(1, "name");
                         stmt.setString(2, "ac_players");
                         final ResultSet result = stmt.executeQuery();
                         if (result.next() && !"utf8_bin".equals(result.getString(1))) {
                                 db.query("ALTER TABLE  `ac_players_new` "
-                                                + "CHANGE  `name`  `name` VARCHAR( 64 ) "
-                                                + "BINARY CHARACTER " + "SET utf8 COLLATE "
-                                                + "utf8_bin NOT NULL");
+                                        + "CHANGE  `name`  `name` VARCHAR( 64 ) "
+                                        + "BINARY CHARACTER " + "SET utf8 COLLATE "
+                                        + "utf8_bin NOT NULL");
                                 ACLogger.info("Updated the collation of the ac_player database.");
 
                         }
                         db.closeStatement(stmt);
                 }
+        }
+
+        /**
+         * Converts the old player table to the new uuid format.
+         */
+        private boolean convertDatabase(final Database db) {
+                try {
+                        if (!db.checkTable("ac_players") || !db.checkTable("ac_players_new")) {
+                                return true;
+                        }
+
+                        final PreparedStatement st = db.prepare("SELECT `id`, `name` FROM `ac_players`;");
+                        final ResultSet rs = st.executeQuery();
+                        while (rs.next()) {
+                                int id = rs.getInt("id");
+                                String name = rs.getString("name");
+
+                                //convert
+                                final UUID uuid = getCoreInstance().getServer().getOfflinePlayer(name).getUniqueId();
+                                final PreparedStatement statement = db.prepare("INSERT INTO `ac_players_new` (`id`, `uuid`) VALUES (?, ?);");
+                                statement.setInt(1, id);
+                                statement.setString(2, uuid.toString());
+                                statement.executeUpdate();
+                                db.closeStatement(statement);
+                                ACLogger.info("Converted player " + name + " to uuids.");
+                        }
+
+                        db.closeStatement(st);
+                        rs.close();
+
+                        if (db.checkTable("ac_players")) {
+                                final PreparedStatement stmnt = db.prepare("ALTER TABLE `ac_players` RENAME TO `ac_players_old`;");
+                                stmnt.executeUpdate();
+                                db.closeStatement(stmnt);
+                        }
+
+                        ACLogger.info("Finished converting players.");
+                        return true;
+                } catch (SQLException ex) {
+                        ACLogger.Log(Level.SEVERE, ex);
+                        return false;
+                }
+        }
+
+        private void convertFiles() {               
+                if(isSqlWrapper()) return;
+                
+                File folder = new File(getCoreInstance().getDataFolder(), "userData");
+                if (!folder.exists() || !folder.isDirectory()) {
+                        return;
+                }
+
+                for (File file : folder.listFiles()) {
+                        DebugLog.beginInfo("Converting file " + file.getName());
+                                                
+                        String name = file.getName().replace(".yml", "").trim();
+                        
+                        DebugLog.addInfo("Trimmed fileName: " + name);
+                        
+                        boolean isUUID = name.split("-").length >= 3;
+                        
+                        DebugLog.addInfo("File needs to be converted: " + (isUUID ? "no" : "yes"));
+                        
+                        if (isUUID) {
+                                DebugLog.endInfo();
+                                continue;
+                        }
+                        
+                        
+                        DebugLog.addInfo("Getting OflinePlayer object from fileName " + name);
+                                                
+                        OfflinePlayer op = getCoreInstance().getServer().getOfflinePlayer(name);
+                        
+                        DebugLog.addInfo("OfflinePlayer uuid: " + op.getUniqueId());
+                        
+                        File newFile = new File(folder, op.getUniqueId().toString() + ".yml");
+                        
+                        DebugLog.addInfo("Renaming file " + file.getName() + " to " + newFile.getName());
+                        
+                        file.renameTo(newFile);
+                        
+                        DebugLog.addInfo("Converting done!");
+                        DebugLog.endInfo();
+                }               
         }
 
         private void convertFactory() {
@@ -1726,8 +1803,8 @@ public class ACHelper {
                         return;
                 }
                 if (currentWrapper.equalsIgnoreCase("yml")
-                                && (convertTo.equalsIgnoreCase("sqlite") || convertTo
-                                .equalsIgnoreCase("mysql"))) {
+                        && (convertTo.equalsIgnoreCase("sqlite") || convertTo
+                        .equalsIgnoreCase("mysql"))) {
                         ConfigEnum.DATA_WRAPPER.setValue(convertTo);
                         try {
                                 ConfigEnum.save();
@@ -1737,8 +1814,8 @@ public class ACHelper {
                                 createTable();
                         } catch (final SQLException e) {
                                 ACLogger.severe(
-                                                "Can't Convert to the Database. There is a problem in your configuration",
-                                                e);
+                                        "Can't Convert to the Database. There is a problem in your configuration",
+                                        e);
                                 return;
                         }
                         WorldManager.getInstance().convertFactory(new SQLWorldFactory());
@@ -1751,23 +1828,23 @@ public class ACHelper {
                         } catch (final IOException e) {
                         }
                         WorldManager.getInstance().convertFactory(
-                                        new FileWorldFactory(coreInstance.getDataFolder().getPath()
-                                                        + File.separator + "worldData"));
+                                new FileWorldFactory(coreInstance.getDataFolder().getPath()
+                                        + File.separator + "worldData"));
                         PlayerManager.getInstance().convertFactory(
-                                        new FilePlayerFactory(coreInstance.getDataFolder()
-                                                        .getPath() + File.separator + "userData"));
+                                new FilePlayerFactory(coreInstance.getDataFolder()
+                                        .getPath() + File.separator + "userData"));
                         FilePlayer.scheduleAsyncSave();
                 } else if (isSqlWrapper()
-                                && (convertTo.equalsIgnoreCase("sqlite") || convertTo
-                                .equalsIgnoreCase("mysql"))) {
+                        && (convertTo.equalsIgnoreCase("sqlite") || convertTo
+                        .equalsIgnoreCase("mysql"))) {
                         final WorldConverter wConverter = WorldManager.getInstance()
-                                        .buildConverter(
-                                                        new FileWorldFactory(coreInstance.getDataFolder()
-                                                                        .getPath() + File.separator + "worldData"));
+                                .buildConverter(
+                                        new FileWorldFactory(coreInstance.getDataFolder()
+                                                .getPath() + File.separator + "worldData"));
                         final PlayerConverter pConverter = PlayerManager.getInstance()
-                                        .buildConverter(
-                                                        new FilePlayerFactory(coreInstance.getDataFolder()
-                                                                        .getPath() + File.separator + "userData"));
+                                .buildConverter(
+                                        new FilePlayerFactory(coreInstance.getDataFolder()
+                                                .getPath() + File.separator + "userData"));
                         final String oldValue = ConfigEnum.DATA_WRAPPER.getString();
                         wConverter.setAfterConverTask(new Runnable() {
 
@@ -1780,12 +1857,12 @@ public class ACHelper {
                                                 createTable();
                                         } catch (final SQLException e) {
                                                 ACLogger.severe(
-                                                                "Can't Convert to the Database. There is a problem in your configuration",
-                                                                e);
+                                                        "Can't Convert to the Database. There is a problem in your configuration",
+                                                        e);
                                                 return;
                                         }
                                         WorldManager.getInstance().convertFactory(
-                                                        new SQLWorldFactory());
+                                                new SQLWorldFactory());
 
                                 }
                         });
@@ -1799,15 +1876,15 @@ public class ACHelper {
                                                 Database.DATABASE.open();
                                         } catch (final SQLException e) {
                                                 ACLogger.severe(
-                                                                "Can't Convert to the Database. There is a problem in your configuration",
-                                                                e);
+                                                        "Can't Convert to the Database. There is a problem in your configuration",
+                                                        e);
                                         }
                                         FilePlayer.forceSaveList();
                                         FilePlayer.stopSavingTask();
 
                                         final PlayerConverter converter = PlayerManager
-                                                        .getInstance().buildConverter(
-                                                                        new SQLPlayerFactory());
+                                                .getInstance().buildConverter(
+                                                        new SQLPlayerFactory());
                                         converter.setAfterConvertTask(new Runnable() {
 
                                                 @Override
@@ -1830,8 +1907,8 @@ public class ACHelper {
                                 Database.DATABASE.open();
                         } catch (final SQLException e) {
                                 ACLogger.severe(
-                                                "Can't Convert to the Database. There is a problem in your configuration",
-                                                e);
+                                        "Can't Convert to the Database. There is a problem in your configuration",
+                                        e);
                         }
                         pConverter.convert();
 

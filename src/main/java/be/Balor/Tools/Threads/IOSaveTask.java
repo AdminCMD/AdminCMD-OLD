@@ -74,6 +74,5 @@ public class IOSaveTask implements Runnable {
 			}
 		}
 		DebugLog.INSTANCE.info("All Configuration File saved.");
-
 	}
 }
