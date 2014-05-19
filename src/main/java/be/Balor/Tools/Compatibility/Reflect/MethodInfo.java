@@ -87,22 +87,7 @@ public abstract class MethodInfo implements GenericDeclaration, Member {
 			@Override
 			public boolean isConstructor() {
 				return false;
-			}
-
-                        @Override
-                        public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-                                return method.getAnnotation(annotationClass);
-                        }
-
-                        @Override
-                        public Annotation[] getAnnotations() {
-                                return method.getAnnotations();
-                        }
-
-                        @Override
-                        public Annotation[] getDeclaredAnnotations() {
-                                return method.getDeclaredAnnotations();
-                        }
+			}                       
 		};
 	}
 
@@ -200,22 +185,7 @@ public abstract class MethodInfo implements GenericDeclaration, Member {
 			@Override
 			public boolean isConstructor() {
 				return true;
-			}
-
-                        @Override
-                        public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-                                return constructor.getAnnotation(annotationClass);
-                        }
-
-                        @Override
-                        public Annotation[] getAnnotations() {
-                                return constructor.getAnnotations();
-                        }
-
-                        @Override
-                        public Annotation[] getDeclaredAnnotations() {
-                                return constructor.getDeclaredAnnotations();
-                        }
+			}                       
 		};
 	}
 
