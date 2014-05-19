@@ -1794,7 +1794,7 @@ public class ACHelper {
                                 file.delete();
                                 continue;
                         }
-                        
+                                                                                             
                         file.renameTo(newFile);
                         
                         DebugLog.addInfo("Converting done!");
