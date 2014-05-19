@@ -1487,7 +1487,7 @@ public class ACHelper {
                         final Database db = Database.DATABASE;
                         db.open();
                         updatePlayerTable(db);
-                        if (!db.checkTable("ac_players") && !db.checkTable("ac_worlds")) {
+                        if (!db.checkTable("ac_players_new") && !db.checkTable("ac_worlds")) {
                                 // Mysql
                                 if (db.getType() == DatabaseType.MYSQL) {
                                         // Players
@@ -1517,9 +1517,9 @@ public class ACHelper {
                                                         + "  PRIMARY KEY (`kit`,`player_id`),"
                                                         + "  KEY `player_id` (`player_id`)"
                                                         + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_players` ("
+                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_players_new` ("
                                                         + "  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
-                                                        + "  `name` varchar(64) BINARY NOT NULL,"
+                                                        + "  `uuid` varchar(64) BINARY NOT NULL,"
                                                         + "  `world` varchar(64) DEFAULT NULL,"
                                                         + "  `x` double DEFAULT NULL,"
                                                         + "  `y` double DEFAULT NULL,"
@@ -1540,22 +1540,22 @@ public class ACHelper {
                                                         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
                                         db.createTable("ALTER TABLE `ac_homes`"
                                                         + "  ADD CONSTRAINT `ac_homes_ibfk_1` FOREIGN KEY (`player_id`) "
-                                                        + "REFERENCES `ac_players` (`id`) "
+                                                        + "REFERENCES `ac_players_new` (`id`) "
                                                         + "ON DELETE CASCADE ON UPDATE CASCADE;");
                                         db.createTable("ALTER TABLE `ac_informations`"
                                                         + "  ADD CONSTRAINT `ac_informations_ibfk_1`"
                                                         + "  FOREIGN KEY (`player_id`) "
-                                                        + "  REFERENCES `ac_players` (`id`)"
+                                                        + "  REFERENCES `ac_players_new` (`id`)"
                                                         + "  ON DELETE CASCADE ON UPDATE CASCADE;");
                                         db.createTable("ALTER TABLE `ac_kit_uses`"
                                                         + "  ADD CONSTRAINT `ac_kit_uses_ibfk_1`"
                                                         + "  FOREIGN KEY (`player_id`)"
-                                                        + "  REFERENCES `ac_players` (`id`)"
+                                                        + "  REFERENCES `ac_players_new` (`id`)"
                                                         + "  ON DELETE CASCADE ON UPDATE CASCADE;");
                                         db.createTable("ALTER TABLE `ac_powers`"
                                                         + "  ADD CONSTRAINT `ac_powers_ibfk_1`"
                                                         + "  FOREIGN KEY (`player_id`)"
-                                                        + "  REFERENCES `ac_players` (`id`)"
+                                                        + "  REFERENCES `ac_players_new` (`id`)"
                                                         + "  ON DELETE CASCADE ON UPDATE CASCADE;");
 
                                         // Worlds
@@ -1639,7 +1639,7 @@ public class ACHelper {
                                                         + "  `info` text NOT NULL,"
                                                         + "  `category` varchar(64) NOT NULL,"
                                                         + "  PRIMARY KEY (`key`,`player_id`)" + ");");
-                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_players` ("
+                                        db.createTable("CREATE TABLE IF NOT EXISTS `ac_players_new` ("
                                                         + "  `id` INTEGER PRIMARY KEY AUTOINCREMENT ,"
                                                         + "  `name` varchar(64) NOT NULL,"
                                                         + "  `world` varchar(64) DEFAULT NULL,"
@@ -1703,19 +1703,19 @@ public class ACHelper {
          * @throws SQLException
          */
         private void updatePlayerTable(final Database db) throws SQLException {
-                if (db.getType() == DatabaseType.MYSQL && db.checkTable("ac_players")) {
+                if (db.getType() == DatabaseType.MYSQL && db.checkTable("ac_players_new")) {
                         final PreparedStatement stmt = db.prepare("SELECT COLLATION_NAME "
                                         + "FROM INFORMATION_SCHEMA.COLUMNS "
                                         + "WHERE COLUMN_NAME =  ? " + "AND TABLE_NAME = ?");
                         stmt.setString(1, "name");
-                        stmt.setString(2, "ac_players");
+                        stmt.setString(2, "ac_players_new");
                         final ResultSet result = stmt.executeQuery();
                         if (result.next() && !"utf8_bin".equals(result.getString(1))) {
-                                db.query("ALTER TABLE  `ac_players` "
+                                db.query("ALTER TABLE  `ac_players_new` "
                                                 + "CHANGE  `name`  `name` VARCHAR( 64 ) "
                                                 + "BINARY CHARACTER " + "SET utf8 COLLATE "
                                                 + "utf8_bin NOT NULL");
-                                ACLogger.info("Updated the collation of the ac_player database.");
+                                ACLogger.info("Updated the collation of the ac_player_new database.");
 
                         }
                         db.closeStatement(stmt);

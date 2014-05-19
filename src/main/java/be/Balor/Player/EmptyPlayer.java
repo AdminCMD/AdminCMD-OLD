@@ -16,17 +16,16 @@
  ************************************************************************/
 package be.Balor.Player;
 
+import be.Balor.Tools.Debug.DebugLog;
+import be.Balor.Tools.Files.ObjectContainer;
+import be.Balor.Tools.Type;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-
-import be.Balor.Tools.Type;
-import be.Balor.Tools.Debug.DebugLog;
-import be.Balor.Tools.Files.ObjectContainer;
 
 /**
  * @author Balor (aka Antoine Aflalo)
@@ -35,11 +34,11 @@ import be.Balor.Tools.Files.ObjectContainer;
 public class EmptyPlayer extends ACPlayer {
 
 	/**
-	 * @param name
+         * @param uuid
 	 */
-	public EmptyPlayer(final String name) {
-		super(name);
-		DebugLog.INSTANCE.severe("Empty Player instancied with name : " + name);
+	public EmptyPlayer(final UUID uuid) {
+		super(uuid);
+		DebugLog.INSTANCE.severe("Empty Player instancied with name : " + uuid.toString());
 	}
 
 	/**
@@ -49,7 +48,12 @@ public class EmptyPlayer extends ACPlayer {
 		super(name);
 		DebugLog.INSTANCE.severe("Empty Player instancied with name : " + name.getName());
 	}
-
+        
+        public EmptyPlayer(String name) {
+              super(UUID.nameUUIDFromBytes(name.getBytes()));  
+              DebugLog.INSTANCE.severe("Empty Player instancied with name : " + name);
+        }
+        
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -358,5 +362,4 @@ public class EmptyPlayer extends ACPlayer {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

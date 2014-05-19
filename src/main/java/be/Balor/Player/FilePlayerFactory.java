@@ -16,14 +16,15 @@
  ************************************************************************/
 package be.Balor.Player;
 
+import be.Balor.Tools.Debug.DebugLog;
+import be.Balor.Tools.Files.Filters.YmlFilter;
+import be.Balor.bukkit.AdminCmd.ACPluginManager;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
-
+import java.util.UUID;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-
-import be.Balor.Tools.Debug.DebugLog;
-import be.Balor.Tools.Files.Filters.YmlFilter;
 
 /**
  * @author Balor (aka Antoine Aflalo)
@@ -31,7 +32,7 @@ import be.Balor.Tools.Files.Filters.YmlFilter;
  */
 public class FilePlayerFactory implements IPlayerFactory {
 	final String directory;
-	private final Set<String> existingPlayers = new HashSet<String>();
+	private final Set<UUID> existingPlayers = new HashSet<UUID>();
 
 	/**
 	 * 
@@ -43,7 +44,7 @@ public class FilePlayerFactory implements IPlayerFactory {
 		final StringBuffer files = new StringBuffer();
 		for (final File player : players) {
 			final String name = player.getName();
-			existingPlayers.add(name.substring(0, name.lastIndexOf('.')));
+			existingPlayers.add(UUID.fromString(name.substring(0, name.lastIndexOf('.'))));
 			files.append(name + " ");
 		}
 		DebugLog.INSTANCE
@@ -51,16 +52,28 @@ public class FilePlayerFactory implements IPlayerFactory {
 	}
 
 	@Override
-	public void addExistingPlayer(final String player) {
+	public void addExistingPlayer(final UUID player) {
 		existingPlayers.add(player);
 	}
 
 	@Override
 	public ACPlayer createPlayer(final String playername) {
-		if (!existingPlayers.contains(playername)) {
-			return new EmptyPlayer(playername);
+                OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(playername);
+		if (!existingPlayers.contains(op.getUniqueId())) {
+			return new EmptyPlayer(op.getUniqueId());
 		} else if (directory != null) {
-			return new FilePlayer(directory, playername);
+			return new FilePlayer(directory, op.getUniqueId());
+		} else {
+			return null;
+		}
+	}
+        
+        @Override
+	public ACPlayer createPlayer(final UUID player) {
+		if (!existingPlayers.contains(player)) {
+			return new EmptyPlayer(player);
+		} else if (directory != null) {
+			return new FilePlayer(directory, player);
 		} else {
 			return null;
 		}
@@ -68,7 +81,7 @@ public class FilePlayerFactory implements IPlayerFactory {
 
 	@Override
 	public ACPlayer createPlayer(final Player player) {
-		if (!existingPlayers.contains(player.getName())) {
+		if (!existingPlayers.contains(player.getUniqueId())) {
 			return new EmptyPlayer(player);
 		} else if (directory != null) {
 			return new FilePlayer(directory, player);
@@ -81,7 +94,7 @@ public class FilePlayerFactory implements IPlayerFactory {
 	 * @return the existingPlayers
 	 */
 	@Override
-	public Set<String> getExistingPlayers() {
+	public Set<UUID> getExistingPlayers() {
 		return existingPlayers;
 	}
 

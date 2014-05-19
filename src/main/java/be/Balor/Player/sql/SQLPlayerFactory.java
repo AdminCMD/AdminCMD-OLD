@@ -14,31 +14,31 @@
     along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.*/
 package be.Balor.Player.sql;
 
+import be.Balor.Player.ACPlayer;
+import be.Balor.Player.EmptyPlayer;
+import be.Balor.Player.IPlayerFactory;
+import be.Balor.Tools.Debug.ACLogger;
+import be.Balor.Tools.Debug.DebugLog;
+import be.Balor.bukkit.AdminCmd.ACPluginManager;
+import belgium.Balor.SQL.Database;
+import com.google.common.base.Joiner;
+import com.google.common.collect.MapMaker;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.UUID;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-
-import be.Balor.Player.ACPlayer;
-import be.Balor.Player.EmptyPlayer;
-import be.Balor.Player.IPlayerFactory;
-import be.Balor.Tools.Debug.ACLogger;
-import be.Balor.Tools.Debug.DebugLog;
-import belgium.Balor.SQL.Database;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.MapMaker;
 
 /**
  * @author Balor (aka Antoine Aflalo)
  * 
  */
 public class SQLPlayerFactory implements IPlayerFactory {
-	private final Map<String, Long> playersID = new MapMaker()
+	private final Map<UUID, Long> playersID = new MapMaker()
 			.concurrencyLevel(6).makeMap();
 
 	/**
@@ -46,11 +46,11 @@ public class SQLPlayerFactory implements IPlayerFactory {
  */
 	public SQLPlayerFactory() {
 		final ResultSet rs = Database.DATABASE
-				.query("SELECT `name`,`id` FROM `ac_players`");
+				.query("SELECT `uuid`,`id` FROM `ac_players_new`");
 
 		try {
 			while (rs.next()) {
-				playersID.put(rs.getString("name"), rs.getLong("id"));
+				playersID.put(UUID.fromString(rs.getString("uuid")), rs.getLong("id"));
 			}
 			rs.close();
 		} catch (final SQLException e) {
@@ -61,13 +61,14 @@ public class SQLPlayerFactory implements IPlayerFactory {
 
 	}
 
-	private Long getPlayerID(final String playername) {
-		Long id = playersID.get(playername);
+        private Long getPlayerID(final UUID uuid) {
+                
+                Long id = playersID.get(uuid);
 		if (id != null) {
 			return id;
 		}
 		try {
-			id = doubleCheckPlayer(playername);
+			id = doubleCheckPlayer(uuid);
 		} catch (final SQLException e) {
 		}
 
@@ -80,14 +81,14 @@ public class SQLPlayerFactory implements IPlayerFactory {
 	 * @return
 	 * @throws SQLException
 	 */
-	private Long doubleCheckPlayer(final String playername) throws SQLException {
+	private Long doubleCheckPlayer(final UUID uuid) throws SQLException {
 		ResultSet rs = null;
 		Long id;
 		final PreparedStatement doubleCheckPlayer = Database.DATABASE
-				.prepare("SELECT `id` FROM `ac_players` WHERE `name` = ?");
+				.prepare("SELECT `id` FROM `ac_players_new` WHERE `uuid` = ?");
 		try {
 			doubleCheckPlayer.clearParameters();
-			doubleCheckPlayer.setString(1, playername);
+			doubleCheckPlayer.setString(1, uuid.toString());
 			doubleCheckPlayer.execute();
 			rs = doubleCheckPlayer.getResultSet();
 			if (rs == null) {
@@ -98,7 +99,7 @@ public class SQLPlayerFactory implements IPlayerFactory {
 			}
 			id = rs.getLong(1);
 			if (id != null) {
-				playersID.put(playername, id);
+				playersID.put(uuid, id);
 			}
 		} finally {
 			try {
@@ -120,11 +121,14 @@ public class SQLPlayerFactory implements IPlayerFactory {
 	 */
 	@Override
 	public ACPlayer createPlayer(final String playername) {
-		final Long id = getPlayerID(playername);
+                
+                final OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(playername);
+                
+		final Long id = getPlayerID(op.getUniqueId());
 		if (id == null) {
-			return new EmptyPlayer(playername);
+			return new EmptyPlayer(op.getUniqueId());
 		} else {
-			return new SQLPlayer(playername, id);
+			return new SQLPlayer(id, op.getUniqueId());
 		}
 
 	}
@@ -137,11 +141,28 @@ public class SQLPlayerFactory implements IPlayerFactory {
 	 */
 	@Override
 	public ACPlayer createPlayer(final Player player) {
-		final Long id = getPlayerID(player.getName());
+		final Long id = getPlayerID(player.getUniqueId());
 		if (id == null) {
 			return new EmptyPlayer(player);
 		} else {
 			return new SQLPlayer(player, id);
+		}
+
+	}
+        
+        /*
+	 * (Non javadoc)
+	 * 
+	 * @see
+	 * be.Balor.Player.IPlayerFactory#createPlayer(java.lang.UUID)
+	 */
+	@Override
+	public ACPlayer createPlayer(final UUID player) {
+		final Long id = getPlayerID(player);
+		if (id == null) {
+			return new EmptyPlayer(player);
+		} else {
+			return new SQLPlayer(id, player);
 		}
 
 	}
@@ -152,7 +173,7 @@ public class SQLPlayerFactory implements IPlayerFactory {
 	 * @see be.Balor.Player.IPlayerFactory#getExistingPlayers()
 	 */
 	@Override
-	public Set<String> getExistingPlayers() {
+	public Set<UUID> getExistingPlayers() {
 		return Collections.unmodifiableSet(playersID.keySet());
 	}
 
@@ -162,7 +183,7 @@ public class SQLPlayerFactory implements IPlayerFactory {
 	 * @see be.Balor.Player.IPlayerFactory#addExistingPlayer(java.lang.String)
 	 */
 	@Override
-	public void addExistingPlayer(final String player) {
+	public void addExistingPlayer(final UUID player) {
 		if (!playersID.containsKey(player)) {
 			try {
 				insertPlayer(player);
@@ -177,14 +198,14 @@ public class SQLPlayerFactory implements IPlayerFactory {
 	 * @param player
 	 * @throws SQLException
 	 */
-	private void insertPlayer(final String player) throws SQLException {
+	private void insertPlayer(final UUID player) throws SQLException {
 		ResultSet rs = null;
 		final PreparedStatement insertPlayer = Database.DATABASE
-				.prepare("INSERT INTO `ac_players` (`name`) VALUES (?);");
+				.prepare("INSERT INTO `ac_players_new` (`uuid`) VALUES (?);");
 		try {
 
 			insertPlayer.clearParameters();
-			insertPlayer.setString(1, player);
+			insertPlayer.setString(1, player.toString());
 			insertPlayer.executeUpdate();
 
 			rs = insertPlayer.getGeneratedKeys();

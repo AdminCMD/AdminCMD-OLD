@@ -16,31 +16,30 @@
  ************************************************************************/
 package be.Balor.Player;
 
+import be.Balor.Tools.Converter.PlayerConverter;
+import be.Balor.Tools.Debug.ACLogger;
+import be.Balor.Tools.Debug.DebugLog;
+import be.Balor.Tools.Type;
+import be.Balor.bukkit.AdminCmd.ACPluginManager;
+import com.google.common.collect.MapMaker;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
-
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-
-import be.Balor.Tools.Type;
-import be.Balor.Tools.Converter.PlayerConverter;
-import be.Balor.Tools.Debug.ACLogger;
-import be.Balor.Tools.Debug.DebugLog;
-import be.Balor.bukkit.AdminCmd.ACPluginManager;
-
-import com.google.common.collect.MapMaker;
 
 /**
  * @author Balor (aka Antoine Aflalo)
  * 
  */
 public class PlayerManager {
-	private final ConcurrentMap<String, ACPlayer> players = new MapMaker().concurrencyLevel(8).weakValues().makeMap();
+	private final ConcurrentMap<UUID, ACPlayer> players = new MapMaker().concurrencyLevel(8).weakValues().makeMap();
 	private final ConcurrentMap<ACPlayer, Boolean> onlinePlayers = new MapMaker().concurrencyLevel(8).makeMap();
 	private final static PlayerManager INSTANCE = new PlayerManager();
 	private IPlayerFactory playerFactory;
@@ -94,16 +93,16 @@ public class PlayerManager {
 	 * @param player
 	 */
 	private synchronized boolean addPlayer(final ACPlayer player) {
-		final String name = player.getName();
-		if (name == null) {
+		final UUID uuid = player.getUuid();
+		if (uuid == null) {
 			throw new NullPointerException();
 		}
 
-		final ACPlayer ref = players.get(name);
+		final ACPlayer ref = players.get(uuid);
 		if (ref != null) {
 			return false;
 		}
-		players.put(name, player);
+		players.put(uuid, player);
 		return true;
 	}
 
@@ -166,14 +165,14 @@ public class PlayerManager {
 
 	public List<ACPlayer> getExistingPlayers() {
 		final ArrayList<ACPlayer> list = new ArrayList<ACPlayer>();
-		for (final String name : playerFactory.getExistingPlayers()) {
+		for (final UUID uuid : playerFactory.getExistingPlayers()) {
 			try {
-				final ACPlayer player = demandACPlayer(name);
+				final ACPlayer player = demandACPlayer(uuid);
 				if (!(player instanceof EmptyPlayer)) {
 					list.add(player);
 				}
 			} catch (final Exception e) {
-				DebugLog.INSTANCE.log(Level.WARNING, "Problem with instancing ACPlayer : " + name, e);
+				DebugLog.INSTANCE.log(Level.WARNING, "Problem with instancing ACPlayer : " + uuid, e);
 			}
 		}
 		return list;
@@ -187,7 +186,20 @@ public class PlayerManager {
 	 * @return the ACPlayer if found, else null
 	 */
 	private synchronized ACPlayer getPlayer(final String name) {
-		final ACPlayer result = players.get(name);
+                final OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(name);
+		final ACPlayer result = players.get(op.getUniqueId());
+		return result;
+	}
+        
+        /**
+	 * Get the wanted player
+	 * 
+	 * @param uuid
+	 *            uuid of the player
+	 * @return the ACPlayer if found, else null
+	 */
+	private synchronized ACPlayer getPlayer(final UUID uuid) {               
+		final ACPlayer result = players.get(uuid);
 		return result;
 	}
 
@@ -207,7 +219,7 @@ public class PlayerManager {
 	}
 
 	public ACPlayer setOnline(final Player player) {
-		playerFactory.addExistingPlayer(player.getName());
+		playerFactory.addExistingPlayer(player.getUniqueId());
 		final ACPlayer acPlayer = demandACPlayer(player);
 		onlinePlayers.put(acPlayer, true);
 		acPlayer.setOnline(true);
@@ -215,7 +227,31 @@ public class PlayerManager {
 		return acPlayer;
 	}
 
-	synchronized ACPlayer demandACPlayer(final String name) {
+	synchronized ACPlayer demandACPlayer(final UUID uuid) {
+		if (uuid == null) {
+			return getPlayer("serverConsole");
+		}
+		ACPlayer result = getPlayer(uuid);
+		if (result == null) {
+			result = playerFactory.createPlayer(uuid);
+			addPlayer(result);
+			result = getPlayer(uuid);
+		} else if (result instanceof EmptyPlayer) {
+			final ACPlayer tmp = playerFactory.createPlayer(uuid);
+			if (tmp instanceof EmptyPlayer) {
+				return result;
+			}
+                        
+			players.remove(uuid);
+			onlinePlayers.remove(result);
+			result = tmp;
+			addPlayer(result);
+			result = getPlayer(uuid);
+		}
+		return result;
+	}
+        
+        synchronized ACPlayer demandACPlayer(final String name) {
 		if (name == null) {
 			return getPlayer("serverConsole");
 		}
@@ -229,11 +265,12 @@ public class PlayerManager {
 			if (tmp instanceof EmptyPlayer) {
 				return result;
 			}
-			players.remove(name);
+                                          
+			players.remove(tmp.getUuid());
 			onlinePlayers.remove(result);
 			result = tmp;
 			addPlayer(result);
-			result = getPlayer(name);
+			result = getPlayer(tmp.getUuid());
 		}
 		return result;
 	}
@@ -253,7 +290,7 @@ public class PlayerManager {
 			if (tmp instanceof EmptyPlayer) {
 				return result;
 			}
-			players.remove(playerName);
+			players.remove(tmp.getUuid());
 			onlinePlayers.remove(result);
 			result = tmp;
 			addPlayer(result);

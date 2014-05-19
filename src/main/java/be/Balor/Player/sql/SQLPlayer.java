@@ -14,6 +14,14 @@
     along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.*/
 package be.Balor.Player.sql;
 
+import be.Balor.Manager.Exceptions.WorldNotLoaded;
+import be.Balor.Player.ACPlayer;
+import be.Balor.Tools.Debug.ACLogger;
+import be.Balor.Tools.Files.ObjectContainer;
+import be.Balor.Tools.Help.String.Str;
+import be.Balor.Tools.Type;
+import be.Balor.World.ACWorld;
+import belgium.Balor.SQL.Database;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,26 +34,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-
-import be.Balor.Manager.Exceptions.WorldNotLoaded;
-import be.Balor.Player.ACPlayer;
-import be.Balor.Tools.Type;
-import be.Balor.Tools.Debug.ACLogger;
-import be.Balor.Tools.Files.ObjectContainer;
-import be.Balor.Tools.Help.String.Str;
-import be.Balor.World.ACWorld;
-import belgium.Balor.SQL.Database;
 
 /**
  * @author Balor (aka Antoine Aflalo)
  * 
  */
 public class SQLPlayer extends ACPlayer {
+        
 	private final Map<String, Location> homes = Collections
 			.synchronizedMap(new HashMap<String, Location>());
 	private final Map<String, Object> infos = Collections
@@ -60,11 +60,10 @@ public class SQLPlayer extends ACPlayer {
 	private final long id;
 
 	/**
-	 * @param name
 	 * @param id
 	 */
-	SQLPlayer(final String name, final long id) {
-		super(name);
+	SQLPlayer(final long id, final UUID uuid) {
+		super(uuid);
 		this.id = id;
 		init();
 	}
@@ -222,7 +221,7 @@ public class SQLPlayer extends ACPlayer {
 	 */
 	private void getDBLastLoc() throws SQLException {
 		final PreparedStatement getLastLoc = Database.DATABASE
-				.prepare("SELECT `world`,`x`,`y`,`z`,`yaw`,`pitch` FROM ac_players WHERE id=?");
+				.prepare("SELECT `world`,`x`,`y`,`z`,`yaw`,`pitch` FROM ac_players_new WHERE id=?");
 		try {
 			getLastLoc.clearParameters();
 			getLastLoc.setLong(1, id);
@@ -330,7 +329,7 @@ public class SQLPlayer extends ACPlayer {
 	public Location getHome(final String home) {
 		Location loc = homes.get(home);
 		if (loc == null) {
-			final String homeName = Str.matchString(getHomeList(), name);
+			final String homeName = Str.matchString(getHomeList(), home);
 			if (homeName == null) {
 				return null;
 			}
@@ -430,7 +429,7 @@ public class SQLPlayer extends ACPlayer {
 	public void setLastLocation(final Location loc) {
 		lastLoc = loc;
 		final PreparedStatement updateLastLoc = Database.DATABASE
-				.prepare("UPDATE `ac_players` SET `world` = ?, `x` = ?, `y` = ?, `z` = ?, `yaw` = ?, `pitch` = ? WHERE `ac_players`.`id` = ?;");
+				.prepare("UPDATE `ac_players_new` SET `world` = ?, `x` = ?, `y` = ?, `z` = ?, `yaw` = ?, `pitch` = ? WHERE `ac_players_new`.`id` = ?;");
 		try {
 			updateLastLoc.clearParameters();
 			if (loc != null) {

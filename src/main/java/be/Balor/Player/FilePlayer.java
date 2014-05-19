@@ -16,6 +16,21 @@
  ************************************************************************/
 package be.Balor.Player;
 
+import be.Balor.Tools.Configuration.ExConfigurationSection;
+import be.Balor.Tools.Configuration.File.ExtendedConfiguration;
+import be.Balor.Tools.Debug.ACLogger;
+import be.Balor.Tools.Debug.DebugLog;
+import be.Balor.Tools.Files.ObjectContainer;
+import be.Balor.Tools.Help.String.Str;
+import be.Balor.Tools.Threads.IOSaveTask;
+import be.Balor.Tools.Type;
+import be.Balor.Tools.Type.Category;
+import be.Balor.World.ACWorld;
+import be.Balor.bukkit.AdminCmd.ACHelper;
+import be.Balor.bukkit.AdminCmd.ACPluginManager;
+import be.Balor.bukkit.AdminCmd.ConfigEnum;
+import belgium.Balor.Workers.InvisibleWorker;
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.util.EnumMap;
@@ -25,29 +40,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-
-import be.Balor.Tools.Type;
-import be.Balor.Tools.Type.Category;
-import be.Balor.Tools.Configuration.ExConfigurationSection;
-import be.Balor.Tools.Configuration.File.ExtendedConfiguration;
-import be.Balor.Tools.Debug.ACLogger;
-import be.Balor.Tools.Debug.DebugLog;
-import be.Balor.Tools.Files.ObjectContainer;
-import be.Balor.Tools.Help.String.Str;
-import be.Balor.Tools.Threads.IOSaveTask;
-import be.Balor.World.ACWorld;
-import be.Balor.bukkit.AdminCmd.ACHelper;
-import be.Balor.bukkit.AdminCmd.ACPluginManager;
-import be.Balor.bukkit.AdminCmd.ConfigEnum;
-import belgium.Balor.Workers.InvisibleWorker;
-
-import com.google.common.io.Files;
 
 /**
  * @author Balor (aka Antoine Aflalo)
@@ -67,9 +65,9 @@ public class FilePlayer extends ACPlayer {
 	/**
  * 
  */
-	FilePlayer(final String directory, final String name) {
-		super(name);
-		final File pFile = new File(directory, name + ".yml");
+	FilePlayer(final String directory, final UUID uuid) {
+		super(uuid);
+		final File pFile = new File(directory, uuid.toString() + ".yml");
 		try {
 			Files.createParentDirs(pFile);
 		} catch (final IOException e) {
@@ -80,12 +78,11 @@ public class FilePlayer extends ACPlayer {
 		powers = datas.addSection("powers");
 		kitsUse = datas.addSection("kitsUse");
 		lastLoc = informations.addSection("lastLoc");
-
 	}
 
 	FilePlayer(final String directory, final Player player) {
 		super(player);
-		final File pFile = new File(directory, name + ".yml");
+		final File pFile = new File(directory, player.getUniqueId().toString() + ".yml");
 		try {
 			Files.createParentDirs(pFile);
 		} catch (final IOException e) {
@@ -96,7 +93,6 @@ public class FilePlayer extends ACPlayer {
 		powers = datas.addSection("powers");
 		kitsUse = datas.addSection("kitsUse");
 		lastLoc = informations.addSection("lastLoc");
-
 	}
 
 	/**
@@ -343,7 +339,7 @@ public class FilePlayer extends ACPlayer {
 			IOSAVET_TASK.removeConfiguration(datas);
 			datas.save();
 		} catch (final IOException e) {
-			ACLogger.severe("Problem while saving Player file of " + getName(), e);
+			ACLogger.severe("Problem while saving Player file of " + getUuid().toString(), e);
 		}
 	}
 
@@ -516,7 +512,7 @@ public class FilePlayer extends ACPlayer {
 		final Map<Type, Object> result = new EnumMap<Type, Object>(Type.class);
 		for (final Entry<String, Object> entry : powers.getValues(false).entrySet()) {
 			final Type power = Type.matchType(entry.getKey());
-			if (power == null || (power != null && power == Type.CUSTOM)) {
+			if (power == null || power == Type.CUSTOM) {
 				continue;
 			}
 			result.put(power, entry.getValue());
@@ -541,4 +537,5 @@ public class FilePlayer extends ACPlayer {
 		}
 		return result;
 	}
+
 }

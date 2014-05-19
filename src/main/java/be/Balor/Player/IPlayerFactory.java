@@ -17,7 +17,7 @@
 package be.Balor.Player;
 
 import java.util.Set;
-
+import java.util.UUID;
 import org.bukkit.entity.Player;
 
 /**
@@ -26,13 +26,15 @@ import org.bukkit.entity.Player;
  */
 public interface IPlayerFactory {
 	ACPlayer createPlayer(String playername);
+        
+        ACPlayer createPlayer(UUID uuid);
 
 	ACPlayer createPlayer(Player player);
 
 	/**
 	 * @return the existingPlayers
 	 */
-	Set<String> getExistingPlayers();
+	Set<UUID> getExistingPlayers();
 
-	void addExistingPlayer(String player);
+	void addExistingPlayer(UUID player);
 }

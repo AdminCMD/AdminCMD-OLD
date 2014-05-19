@@ -16,16 +16,16 @@
  ************************************************************************/
 package be.Balor.Tools.Converter;
 
-import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import be.Balor.Player.AfterPlayerConvertTask;
 import be.Balor.Player.FilePlayer;
 import be.Balor.Player.FilePlayerFactory;
 import be.Balor.Player.IPlayerFactory;
 import be.Balor.Player.PlayerConvertTask;
 import be.Balor.Tools.Debug.ACLogger;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * @author Antoine
@@ -51,11 +51,11 @@ public class PlayerConverter {
 		if (newFactory instanceof FilePlayerFactory) {
 			FilePlayer.scheduleAsyncSave();
 		}
-		final Set<String> existingPlayers = oldFactory.getExistingPlayers();
+		final Set<UUID> existingPlayers = oldFactory.getExistingPlayers();
 		ACLogger.info("Begin conversion of " + existingPlayers.size()
 				+ " players");
-		for (final String name : this.oldFactory.getExistingPlayers()) {
-			pool.execute(new PlayerConvertTask(oldFactory, newFactory, name));
+		for (final UUID uuid : this.oldFactory.getExistingPlayers()) {
+			pool.execute(new PlayerConvertTask(oldFactory, newFactory, uuid));
 		}
 		pool.execute(new AfterPlayerConvertTask(newFactory));
 		if (afterConvertTask != null) {

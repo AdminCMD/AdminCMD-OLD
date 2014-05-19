@@ -16,14 +16,13 @@
  ************************************************************************/
 package be.Balor.Player;
 
-import java.util.Map.Entry;
-
-import org.bukkit.Location;
-
 import be.Balor.Manager.Exceptions.WorldNotLoaded;
-import be.Balor.Tools.Type;
 import be.Balor.Tools.Debug.ACLogger;
 import be.Balor.Tools.Debug.DebugLog;
+import be.Balor.Tools.Type;
+import java.util.Map.Entry;
+import java.util.UUID;
+import org.bukkit.Location;
 
 /**
  * @author Antoine
@@ -45,6 +44,18 @@ public class PlayerConvertTask implements Runnable {
 		this.newFactory = newFactory;
 		this.oldPlayer = oldFactory.createPlayer(name);
 	}
+        
+        /**
+	 * @param oldFactory
+	 * @param newFactory
+	 * @param uuid
+	 */
+	public PlayerConvertTask(final IPlayerFactory oldFactory,
+			final IPlayerFactory newFactory, final UUID uuid) {
+		super();
+		this.newFactory = newFactory;
+		this.oldPlayer = oldFactory.createPlayer(uuid);
+	}
 
 	public PlayerConvertTask(final IPlayerFactory newFactory,
 			final ACPlayer oldPlayer) {
@@ -61,7 +72,7 @@ public class PlayerConvertTask implements Runnable {
 	 */
 	@Override
 	public void run() {
-		final String name = oldPlayer.getName();
+		final UUID name = oldPlayer.getUuid();
 		ACLogger.info("Convert player : " + name);
 		DebugLog.beginInfo("Convert player : " + name);
 		newFactory.addExistingPlayer(name);

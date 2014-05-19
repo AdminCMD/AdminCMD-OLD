@@ -16,32 +16,32 @@
  ************************************************************************/
 package be.Balor.Player;
 
+import be.Balor.Manager.Commands.ACCommandContainer;
+import be.Balor.Manager.Exceptions.ActionNotPermitedException;
+import be.Balor.Manager.Exceptions.PlayerNotFound;
+import be.Balor.Manager.Permissions.PermissionManager;
+import be.Balor.Tools.Files.ObjectContainer;
+import be.Balor.Tools.TpRequest;
+import be.Balor.Tools.Type;
+import be.Balor.Tools.Type.Category;
+import be.Balor.bukkit.AdminCmd.ACPluginManager;
 import java.security.InvalidParameterException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
+import java.util.UUID;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-
-import be.Balor.Manager.Commands.ACCommandContainer;
-import be.Balor.Manager.Exceptions.ActionNotPermitedException;
-import be.Balor.Manager.Exceptions.PlayerNotFound;
-import be.Balor.Manager.Permissions.PermissionManager;
-import be.Balor.Tools.TpRequest;
-import be.Balor.Tools.Type;
-import be.Balor.Tools.Type.Category;
-import be.Balor.Tools.Files.ObjectContainer;
-import be.Balor.bukkit.AdminCmd.ACPluginManager;
 
 /**
  * @author Balor (aka Antoine Aflalo)
  * 
  */
 public abstract class ACPlayer {
-	protected final String name;
+        private final UUID uuid;
 	private final int hashCode;
 	protected boolean online = false;
 	protected ACCommandContainer lastCmd = null;
@@ -50,21 +50,22 @@ public abstract class ACPlayer {
 
 	/**
 	 *
+         * @param uuid uuid of the player
 	 */
-	protected ACPlayer(final String name) {
-		this.name = name;
+	protected ACPlayer(UUID uuid) {
+                this.uuid = uuid;
 		final int prime = 41;
 		int result = 7;
-		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+		result = prime * result + (this.uuid == null ? 0 : this.uuid.hashCode());
 		hashCode = result;
-		handler = ACPluginManager.getServer().getPlayer(this.name);
+		handler = ACPluginManager.getServer().getPlayer(this.uuid);
 	}
 
 	protected ACPlayer(final Player p) {
-		this.name = p.getName();
+                this.uuid = p.getUniqueId();
 		final int prime = 41;
 		int result = 7;
-		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+		result = prime * result + (this.uuid == null ? 0 : this.uuid.hashCode());		
 		hashCode = result;
 		handler = p;
 	}
@@ -121,15 +122,27 @@ public abstract class ACPlayer {
 	public Player getHandler() {
 		return handler;
 	}
-
-	/**
-	 * Get Player Name
+        
+        /**
+	 * Get the name 
 	 * 
 	 * @return
 	 */
-	public String getName() {
-		return name;
-	}
+        public String getName() {
+                final OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(uuid);
+                return op.getName();
+        }
+
+	
+	     
+        /**
+         * Get Player Uuid
+         * 
+         * @return 
+         */
+        public UUID getUuid() {
+                return uuid;
+        }
 
 	/**
 	 * Add a new home for the player
@@ -394,7 +407,7 @@ public abstract class ACPlayer {
 	 * @return powers of the player
 	 */
 	public abstract Map<String, Object> getCustomPowers();
-
+                
 	/**
 	 * @param isOnline
 	 *            the isOnline to set
@@ -404,7 +417,7 @@ public abstract class ACPlayer {
 		if (!this.online) {
 			this.handler = null;
 		} else if (handler == null) {
-			this.handler = ACPluginManager.getServer().getPlayer(this.name);
+			this.handler = ACPluginManager.getServer().getPlayer(this.uuid);
 		}
 	}
 
@@ -486,14 +499,15 @@ public abstract class ACPlayer {
 		if (!(obj instanceof ACPlayer)) {
 			return false;
 		}
-		final ACPlayer other = (ACPlayer) obj;
-		if (name == null) {
-			if (other.name != null) {
-				return false;
-			}
-		} else if (!name.equals(other.name)) {
-			return false;
-		}
+		final ACPlayer other = (ACPlayer) obj;		
+                
+                if(uuid == null) {
+                        if(other.uuid != null) {
+                                return false;
+                        }
+                } else if(!uuid.equals(other.uuid)) {
+                        return false;
+                }
 		return true;
 	}
 
@@ -504,7 +518,7 @@ public abstract class ACPlayer {
 	 */
 	@Override
 	public String toString() {
-		return getName();
+		return "ACPlayer{uuid=" + uuid.toString() + "}";
 	}
 
 	/**
