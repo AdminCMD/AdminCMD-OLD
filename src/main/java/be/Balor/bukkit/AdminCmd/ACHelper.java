@@ -1641,7 +1641,7 @@ public class ACHelper {
                                                         + "  PRIMARY KEY (`key`,`player_id`)" + ");");
                                         db.createTable("CREATE TABLE IF NOT EXISTS `ac_players_new` ("
                                                         + "  `id` INTEGER PRIMARY KEY AUTOINCREMENT ,"
-                                                        + "  `name` varchar(64) NOT NULL,"
+                                                        + "  `uuid` varchar(64) NOT NULL,"
                                                         + "  `world` varchar(64) DEFAULT NULL,"
                                                         + "  `x` double DEFAULT NULL,"
                                                         + "  `y` double  DEFAULT NULL,"
