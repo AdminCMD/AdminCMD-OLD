@@ -156,7 +156,7 @@ public class BanPlayer extends PlayerCommand {
 					}
 					toDo = new TempBannedIP(banPlayerString, message, tmpBan * 60);
 				} else {
-                                        OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(banPlayerString);
+                                        OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(UUID.fromString(banPlayerString));
 					toDo = new TempBannedPlayer(op.getUniqueId().toString(), message, tmpBan * 60);
 				}
 				DebugLog.addInfo("Banned for : " + ((ITempBan) toDo).getReadableTimeLeft());
@@ -172,7 +172,7 @@ public class BanPlayer extends PlayerCommand {
 					}
 					toDo = new BannedIP(banPlayerString, message);
 				} else {
-                                        OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(banPlayerString);
+                                        OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(UUID.fromString(banPlayerString));
 					toDo = new BannedPlayer(op.getUniqueId().toString(), message);
 				}
 			}

@@ -63,8 +63,7 @@ public class MuteList extends PlayerCommand {
 		}
 
 		try {
-			for (final String s : Lister.getLister(Lister.List.MUTE).getPage(
-					page)) {                      
+			for (final String s : Lister.getLister(Lister.List.MUTE).getPage(page)) {                      
 				sender.sendMessage(s);
 			}
 		} catch (final EmptyListException e) {
