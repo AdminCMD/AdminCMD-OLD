@@ -16,21 +16,21 @@
  ************************************************************************/
 package be.Balor.Manager.Commands.Player;
 
-import java.util.HashMap;
-
-import org.bukkit.command.CommandSender;
-
-import be.Balor.Manager.LocaleManager;
 import be.Balor.Manager.Commands.CommandArgs;
 import be.Balor.Manager.Exceptions.ActionNotPermitedException;
 import be.Balor.Manager.Exceptions.PlayerNotFound;
+import be.Balor.Manager.LocaleManager;
 import be.Balor.Player.BannedPlayer;
 import be.Balor.Player.IBan;
 import be.Balor.Tools.CommandUtils.Immunity;
 import be.Balor.Tools.CommandUtils.Users;
 import be.Balor.bukkit.AdminCmd.ACHelper;
+import be.Balor.bukkit.AdminCmd.ACPluginManager;
 import be.Balor.bukkit.AdminCmd.LocaleHelper;
+import java.util.HashMap;
 import java.util.UUID;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 
 /**
  * @author Balor (aka Antoine Aflalo)
@@ -57,7 +57,10 @@ public class UnBan extends PlayerCommand {
 	public void execute(final CommandSender sender, final CommandArgs args)
 			throws ActionNotPermitedException, PlayerNotFound {
 		final String unban = args.getString(0);
-		final IBan ban = ACHelper.getInstance().getBan(unban);
+                
+                final OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(unban);
+                
+		final IBan ban = ACHelper.getInstance().getBan(op.getUniqueId().toString());
 		if (ban != null) {
 			if (ban instanceof BannedPlayer
 					&& !Immunity.checkImmunity(sender, args, 0)) {
