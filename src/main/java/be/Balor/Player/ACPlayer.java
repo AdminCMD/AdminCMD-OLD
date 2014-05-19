@@ -52,7 +52,7 @@ public abstract class ACPlayer {
 	 *
          * @param uuid uuid of the player
 	 */
-	protected ACPlayer(UUID uuid) {
+	protected ACPlayer(final UUID uuid) {
                 this.uuid = uuid;
 		final int prime = 41;
 		int result = 7;

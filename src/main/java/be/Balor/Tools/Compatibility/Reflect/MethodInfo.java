@@ -88,6 +88,21 @@ public abstract class MethodInfo implements GenericDeclaration, Member {
 			public boolean isConstructor() {
 				return false;
 			}                       
+
+                        public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+                                //only Java 8
+                                return null;
+                        }
+
+                        public Annotation[] getAnnotations() {
+                                //only Java 8
+                                return null;
+                        }
+
+                        public Annotation[] getDeclaredAnnotations() {
+                                //only Java 8
+                                return null;
+                        }
 		};
 	}
 
@@ -185,7 +200,22 @@ public abstract class MethodInfo implements GenericDeclaration, Member {
 			@Override
 			public boolean isConstructor() {
 				return true;
-			}                       
+			}       
+                        
+                        public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+                                //only Java 8
+                                return null;
+                        }
+
+                        public Annotation[] getAnnotations() {
+                                //only Java 8
+                                return null;
+                        }
+
+                        public Annotation[] getDeclaredAnnotations() {
+                                //only Java 8
+                                return null;
+                        }
 		};
 	}
 
