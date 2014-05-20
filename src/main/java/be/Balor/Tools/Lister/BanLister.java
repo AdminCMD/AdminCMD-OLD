@@ -16,16 +16,18 @@
  ************************************************************************/
 package be.Balor.Tools.Lister;
 
+import be.Balor.Player.IBan;
+import be.Balor.Tools.Utils;
+import be.Balor.bukkit.AdminCmd.ACHelper;
+import be.Balor.bukkit.AdminCmd.ACPluginManager;
+import be.Balor.bukkit.AdminCmd.LocaleHelper;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
-import be.Balor.Player.IBan;
-import be.Balor.Tools.Utils;
-import be.Balor.bukkit.AdminCmd.ACHelper;
-import be.Balor.bukkit.AdminCmd.LocaleHelper;
+import java.util.UUID;
+import org.bukkit.OfflinePlayer;
 
 /**
  * @author Balor (aka Antoine Aflalo)
@@ -54,12 +56,12 @@ public class BanLister extends Lister {
 		final HashMap<String, String> replace = new HashMap<String, String>();
 		for (final IBan p : banned) {
 			replace.clear();
-			replace.put("player", p.getPlayer());
+                        OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(UUID.fromString(p.getPlayer()));
+			replace.put("player", op.getName());
 			replace.put("reason", p.getReason());
 			replace.put("banner", p.getBanner());
 			replace.put("date", Utils.replaceDateAndTimeFormat(p.getDate()));
 			ban.put(p.getPlayer(), LocaleHelper.BANLIST.getLocale(replace));
-
 		}
 
 	}

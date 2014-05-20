@@ -103,7 +103,7 @@ public class BanPlayer extends PlayerCommand {
 				}
 			}
 			message = parseMessage(args, message, tmpBan == null, sender);
-			replace.put("player", banPlayerString);
+			replace.put("player", args.getString(0));
 			replace.put("reason", message);
 			final IBan ban = getBanType(banPlayerString, tmpBan, message, sender, replace);
 

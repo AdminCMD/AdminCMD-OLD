@@ -57,11 +57,11 @@ public class MuteLister extends Lister {
 		for (final ACPlayer p : players) {
 			replace.clear();
 			if (p.hasPower(Type.MUTED)) {
-				replace.put("player", p.getUuid().toString());
+				replace.put("player", p.getName());
 				replace.put("msg", p.getPower(Type.MUTED).getString());
 				mute.add(LocaleHelper.MUTELIST.getLocale(replace));
 			} else if (p.hasPower(Type.MUTED_COMMAND)) {
-				replace.put("player", p.getUuid().toString());
+				replace.put("player", p.getName());
 				replace.put("msg", p.getPower(Type.MUTED_COMMAND).getString());
 				mute.add(LocaleHelper.MUTELIST.getLocale(replace));
 			} 
