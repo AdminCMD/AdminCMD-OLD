@@ -1,0 +1,21 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}***********************************************************************
+${licensePrefix} This file is part of AdminCmd.
+${licensePrefix} 
+${licensePrefix} AdminCmd is free software: you can redistribute it and/or modify it under the
+${licensePrefix} terms of the GNU General Public License as published by the Free Software
+${licensePrefix} Foundation, either version 3 of the License, or (at your option) any later
+${licensePrefix} version.
+${licensePrefix} 
+${licensePrefix} AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+${licensePrefix} WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+${licensePrefix} A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+${licensePrefix} 
+${licensePrefix} You should have received a copy of the GNU General Public License along with
+${licensePrefix} AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+${licensePrefix}************************************************************************
+<#if licenseLast??>
+${licenseLast}
+</#if>
