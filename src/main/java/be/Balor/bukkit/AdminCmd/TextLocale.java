@@ -1,19 +1,20 @@
-/************************************************************************
- * This file is part of AdminCmd.									
- *																		
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by	
- * the Free Software Foundation, either version 3 of the License, or		
- * (at your option) any later version.									
- *																		
- * AdminCmd is distributed in the hope that it will be useful,	
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the			
- * GNU General Public License for more details.							
- *																		
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.
- ************************************************************************/
+/**
+ * **********************************************************************
+ * This file is part of AdminCmd.
+ *
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.bukkit.AdminCmd;
 
 import java.io.IOException;
@@ -39,143 +40,142 @@ import com.google.common.base.Joiner;
 
 /**
  * @author Balor (aka Antoine Aflalo)
- * 
+ *
  */
 public enum TextLocale {
-	NEWS("NEWS"), RULES("Rules"), MOTD("MOTD"), MOTD_NEW(
-			"MOTDNewUser",
-			"motdNewUser");
-	private final String locale;
-	private final String file;
-	private static ExtendedConfiguration version;
-	public static final List<String> LOCALES = new ArrayList<String>();
 
-	/**
- * 
- */
-	static {
-		for (final TextLocale text : TextLocale.values()) {
-			LOCALES.add(text.locale);
-		}
-	}
+        NEWS("NEWS"), RULES("Rules"), MOTD("MOTD"), MOTD_NEW(
+                "MOTDNewUser",
+                "motdNewUser");
+        private final String locale;
+        private final String file;
+        private static ExtendedConfiguration version;
+        public static final List<String> LOCALES = new ArrayList<String>();
 
-	private TextLocale(final String locale) {
-		this.locale = locale;
-		this.file = this.locale.toLowerCase();
-	}
+        /**
+         *
+         */
+        static {
+                for (final TextLocale text : TextLocale.values()) {
+                        LOCALES.add(text.locale);
+                }
+        }
 
-	private TextLocale(final String locale, final String file) {
-		this.locale = locale;
-		this.file = file;
-	}
+        private TextLocale(final String locale) {
+                this.locale = locale;
+                this.file = this.locale.toLowerCase();
+        }
 
-	/**
-	 * Save the new content of the locale
-	 * 
-	 * @param content
-	 *            new content
-	 */
-	public void saveContent(final String content) {
-		final String parsedContent = parseContent(content);
-		LocaleManager.getInstance().addLocale(locale, parsedContent, true);
-		FileManager.getInstance().setTxtFile(file, parsedContent);
-		version.set(file, System.currentTimeMillis());
-		try {
-			version.save();
-		} catch (final IOException e) {
-		}
-	}
+        private TextLocale(final String locale, final String file) {
+                this.locale = locale;
+                this.file = file;
+        }
 
-	/**
-	 * @param content
-	 */
-	private String parseContent(final String content) {
-		if (content == null) {
-			return "";
-		}
-		return Materials.colorParser(content.replaceAll("\\n", "\n").replaceAll(
-				"//n", "\n"));
-	}
+        /**
+         * Save the new content of the locale
+         *
+         * @param content new content
+         */
+        public void saveContent(final String content) {
+                final String parsedContent = parseContent(content);
+                LocaleManager.getInstance().addLocale(locale, parsedContent, true);
+                FileManager.getInstance().setTxtFile(file, parsedContent);
+                version.set(file, System.currentTimeMillis());
+                try {
+                        version.save();
+                } catch (final IOException e) {
+                }
+        }
 
-	/**
-	 * Reload the text file
-	 */
-	public void reloadContent() {
-		final String result = parseContent(FileManager.getInstance()
-				.getTextFile(file + ".txt"));
-		LocaleManager.getInstance().addLocale(locale, result, true);
-		version.set(file, System.currentTimeMillis());
-		try {
-			version.save();
-		} catch (final IOException e) {
-		}
+        /**
+         * @param content
+         */
+        private String parseContent(final String content) {
+                if (content == null) {
+                        return "";
+                }
+                return Materials.colorParser(content.replaceAll("\\n", "\n").replaceAll(
+                        "//n", "\n"));
+        }
 
-	}
+        /**
+         * Reload the text file
+         */
+        public void reloadContent() {
+                final String result = parseContent(FileManager.getInstance()
+                        .getTextFile(file + ".txt"));
+                LocaleManager.getInstance().addLocale(locale, result, true);
+                version.set(file, System.currentTimeMillis());
+                try {
+                        version.save();
+                } catch (final IOException e) {
+                }
 
-	/**
-	 * @param version
-	 *            the version to set
-	 */
-	static void setVersion(final ExtendedConfiguration version) {
-		TextLocale.version = version;
-	}
+        }
 
-	/**
-	 * Get the last modification time of this locale
-	 * 
-	 * @return milliseconds
-	 */
-	public long getModifTime() {
-		return version.getLong(file, 0);
-	}
+        /**
+         * @param version the version to set
+         */
+        static void setVersion(final ExtendedConfiguration version) {
+                TextLocale.version = version;
+        }
 
-	/**
-	 * Send the formated text of the locale to the player.
-	 * 
-	 * @return .
-	 */
-	public void sendText(final Player p) {
-		final HashMap<String, String> replace = new HashMap<String, String>();
-		final ACPlayer acPlayer = ACPlayer.getPlayer(p);
-		final long total = acPlayer.getCurrentPlayedTime();
-		replace.putAll(Utils.playedTime(Users.getPlayerName(p), total));
-		replace.put(
-				"nb",
-				String.valueOf(p.getServer().getOnlinePlayers().length
-						- InvisibleWorker.getInstance().nbInvisibles()));
-		replace.put("world", p.getWorld().getName());
-		replace.put("x", String.valueOf(p.getLocation().getX()));
-		replace.put("y", String.valueOf(p.getLocation().getY()));
-		replace.put("z", String.valueOf(p.getLocation().getZ()));
-		final Collection<String> list = Users.getPlayerList(p);
-		String connected = Joiner.on(", ").join(list);
-		if (connected.length() >= ACMinecraftFontWidthCalculator.chatwidth) {
-			final String tmp = connected.substring(0,
-					ACMinecraftFontWidthCalculator.chatwidth);
-			final String tmp2 = connected.substring(
-					ACMinecraftFontWidthCalculator.chatwidth,
-					connected.length());
-			connected = tmp + "//n" + tmp2;
-		}
-		replace.put("connected", connected);
-		final String serverTime = Utils.replaceDateAndTimeFormat(Utils
-				.getServerRealTime("GMT" + ConfigEnum.DT_GMT.getString()));
-		replace.put("time", serverTime);
-		final String date = Utils.replaceDateAndTimeFormat(acPlayer,
-				Whois.LOGIN);
-		if (date == null) {
-			replace.put("lastlogin", LocaleManager.I18n("noLoginInformation"));
-		} else {
-			replace.put("lastlogin", date);
-		}
-		final String messageToSend = parseContent(LocaleManager.I18n(locale, replace));
-		if (messageToSend != null) {
-			for (final String toSend : messageToSend.split("\n")) {
-				if (toSend.isEmpty()) {
-					continue;
-				}
-				p.sendMessage(toSend);
-			}
-		}
-	}
+        /**
+         * Get the last modification time of this locale
+         *
+         * @return milliseconds
+         */
+        public long getModifTime() {
+                return version.getLong(file, 0);
+        }
+
+        /**
+         * Send the formated text of the locale to the player.
+         *
+         * @return .
+         */
+        public void sendText(final Player p) {
+                final HashMap<String, String> replace = new HashMap<String, String>();
+                final ACPlayer acPlayer = ACPlayer.getPlayer(p);
+                final long total = acPlayer.getCurrentPlayedTime();
+                replace.putAll(Utils.playedTime(Users.getPlayerName(p), total));
+                replace.put(
+                        "nb",
+                        String.valueOf(p.getServer().getOnlinePlayers().length
+                                - InvisibleWorker.getInstance().nbInvisibles()));
+                replace.put("world", p.getWorld().getName());
+                replace.put("x", String.valueOf(p.getLocation().getX()));
+                replace.put("y", String.valueOf(p.getLocation().getY()));
+                replace.put("z", String.valueOf(p.getLocation().getZ()));
+                final Collection<String> list = Users.getPlayerList(p);
+                String connected = Joiner.on(", ").join(list);
+                if (connected.length() >= ACMinecraftFontWidthCalculator.chatwidth) {
+                        final String tmp = connected.substring(0,
+                                ACMinecraftFontWidthCalculator.chatwidth);
+                        final String tmp2 = connected.substring(
+                                ACMinecraftFontWidthCalculator.chatwidth,
+                                connected.length());
+                        connected = tmp + "//n" + tmp2;
+                }
+                replace.put("connected", connected);
+                final String serverTime = Utils.replaceDateAndTimeFormat(Utils
+                        .getServerRealTime("GMT" + ConfigEnum.DT_GMT.getString()));
+                replace.put("time", serverTime);
+                final String date = Utils.replaceDateAndTimeFormat(acPlayer,
+                        Whois.LOGIN);
+                if (date == null) {
+                        replace.put("lastlogin", LocaleManager.I18n("noLoginInformation"));
+                } else {
+                        replace.put("lastlogin", date);
+                }
+                final String messageToSend = parseContent(LocaleManager.I18n(locale, replace));
+                if (messageToSend != null) {
+                        for (final String toSend : messageToSend.split("\n")) {
+                                if (toSend.isEmpty()) {
+                                        continue;
+                                }
+                                p.sendMessage(toSend);
+                        }
+                }
+        }
 }

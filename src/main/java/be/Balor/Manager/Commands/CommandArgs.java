@@ -30,246 +30,245 @@ import com.google.common.base.Joiner;
 
 /**
  * @author Balor (aka Antoine Aflalo)
- * 
+ *
  */
 public class CommandArgs implements Iterable<String> {
-	protected final List<String> parsedArgs;
-	protected final Map<Character, String> valueFlags = new HashMap<Character, String>();
-	protected final Set<Character> booleanFlags = new HashSet<Character>();
-	public int length;
-	protected final String[] args;
 
-	public CommandArgs(final String args) {
-		this(args.split(" "));
-	}
+        protected final List<String> parsedArgs;
+        protected final Map<Character, String> valueFlags = new HashMap<Character, String>();
+        protected final Set<Character> booleanFlags = new HashSet<Character>();
+        public int length;
+        protected final String[] args;
 
-	/**
-		 *
-		 */
-	public CommandArgs(final String[] args) {
-		this.args = args;
-		final List<Integer> argIndexList = new ArrayList<Integer>(args.length);
-		final List<String> argList = new ArrayList<String>(args.length);
-		for (int i = 0; i < args.length; ++i) {
-			String arg = args[i];
-			if (arg.length() == 0) {
-				continue;
-			}
+        public CommandArgs(final String args) {
+                this(args.split(" "));
+        }
 
-			argIndexList.add(i);
+        /**
+         *
+         */
+        public CommandArgs(final String[] args) {
+                this.args = args;
+                final List<Integer> argIndexList = new ArrayList<Integer>(args.length);
+                final List<String> argList = new ArrayList<String>(args.length);
+                for (int i = 0; i < args.length; ++i) {
+                        String arg = args[i];
+                        if (arg.length() == 0) {
+                                continue;
+                        }
 
-			switch (arg.charAt(0)) {
-			case '\'':
-			case '"':
-				final StringBuilder build = new StringBuilder();
-				final char quotedChar = arg.charAt(0);
+                        argIndexList.add(i);
 
-				int endIndex;
-				for (endIndex = i; endIndex < args.length; ++endIndex) {
-					final String arg2 = args[endIndex];
-					if (arg2.isEmpty()) {
-						continue;
-					}
-					if (arg2.charAt(arg2.length() - 1) == quotedChar) {
-						if (endIndex != i) {
-							build.append(' ');
-						}
-						if (endIndex == i && arg2.length() == 1) {
-							continue;
-						}
-						build.append(arg2.substring(endIndex == i ? 1 : 0,
-								arg2.length() - 1));
-						break;
-					} else if (endIndex == i) {
-						build.append(arg2.substring(1));
-					} else {
-						build.append(' ').append(arg2);
-					}
-				}
+                        switch (arg.charAt(0)) {
+                                case '\'':
+                                case '"':
+                                        final StringBuilder build = new StringBuilder();
+                                        final char quotedChar = arg.charAt(0);
 
-				if (endIndex < args.length) {
-					arg = build.toString();
-					i = endIndex;
-				}
+                                        int endIndex;
+                                        for (endIndex = i; endIndex < args.length; ++endIndex) {
+                                                final String arg2 = args[endIndex];
+                                                if (arg2.isEmpty()) {
+                                                        continue;
+                                                }
+                                                if (arg2.charAt(arg2.length() - 1) == quotedChar) {
+                                                        if (endIndex != i) {
+                                                                build.append(' ');
+                                                        }
+                                                        if (endIndex == i && arg2.length() == 1) {
+                                                                continue;
+                                                        }
+                                                        build.append(arg2.substring(endIndex == i ? 1 : 0,
+                                                                arg2.length() - 1));
+                                                        break;
+                                                } else if (endIndex == i) {
+                                                        build.append(arg2.substring(1));
+                                                } else {
+                                                        build.append(' ').append(arg2);
+                                                }
+                                        }
 
-				// In case there is an empty quoted string
-				if (arg.length() == 0) {
-					continue;
-				}
-				// else raise exception about hanging quotes?
-			}
-			argList.add(arg);
-		}
-		// Then flags
+                                        if (endIndex < args.length) {
+                                                arg = build.toString();
+                                                i = endIndex;
+                                        }
 
-		final List<Integer> originalArgIndices = new ArrayList<Integer>(
-				argIndexList.size());
-		this.parsedArgs = new ArrayList<String>(argList.size());
+                                        // In case there is an empty quoted string
+                                        if (arg.length() == 0) {
+                                                continue;
+                                        }
+                                // else raise exception about hanging quotes?
+                        }
+                        argList.add(arg);
+                }
+                // Then flags
 
-		for (int nextArg = 0; nextArg < argList.size();) {
-			// Fetch argument
-			final String arg = argList.get(nextArg++);
+                final List<Integer> originalArgIndices = new ArrayList<Integer>(
+                        argIndexList.size());
+                this.parsedArgs = new ArrayList<String>(argList.size());
 
-			if (arg.charAt(0) == '-' && arg.length() > 1
-					&& arg.matches("^-[a-zA-Z]+$")) {
-				for (int i = 1; i < arg.length(); ++i) {
-					final char flagName = Character.toLowerCase(arg.charAt(i));
-					if (this.valueFlags.containsKey(flagName)) {
-						continue;
-					}
+                for (int nextArg = 0; nextArg < argList.size();) {
+                        // Fetch argument
+                        final String arg = argList.get(nextArg++);
 
-					if (nextArg >= argList.size()) {
-						this.booleanFlags.add(flagName);
-					} else {
-						this.valueFlags.put(flagName, argList.get(nextArg));
-					}
+                        if (arg.charAt(0) == '-' && arg.length() > 1
+                                && arg.matches("^-[a-zA-Z]+$")) {
+                                for (int i = 1; i < arg.length(); ++i) {
+                                        final char flagName = Character.toLowerCase(arg.charAt(i));
+                                        if (this.valueFlags.containsKey(flagName)) {
+                                                continue;
+                                        }
 
-				}
-				continue;
-			}
-			originalArgIndices.add(argIndexList.get(nextArg - 1));
-			parsedArgs.add(arg);
+                                        if (nextArg >= argList.size()) {
+                                                this.booleanFlags.add(flagName);
+                                        } else {
+                                                this.valueFlags.put(flagName, argList.get(nextArg));
+                                        }
 
-		}
-		this.length = parsedArgs.size();
-	}
+                                }
+                                continue;
+                        }
+                        originalArgIndices.add(argIndexList.get(nextArg - 1));
+                        parsedArgs.add(arg);
 
-	public String getString(final int index) {
-		try {
-			final String result = parsedArgs.get(index);
-			if (result == null) {
-				return null;
-			}
-			return result;
-		} catch (final IndexOutOfBoundsException e) {
-			return null;
-		}
+                }
+                this.length = parsedArgs.size();
+        }
 
-	}
+        public String getString(final int index) {
+                try {
+                        final String result = parsedArgs.get(index);
+                        if (result == null) {
+                                return null;
+                        }
+                        return result;
+                } catch (final IndexOutOfBoundsException e) {
+                        return null;
+                }
 
-	/**
-	 * Try to parse the argument to an int
-	 * 
-	 * @param index
-	 * @return
-	 * @throws NumberFormatException
-	 */
-	public int getInt(final int index) throws NumberFormatException {
-		return Integer.parseInt(getString(index));
-	}
+        }
 
-	/**
-	 * Try to parse the argument to a float
-	 * 
-	 * @param index
-	 * @return
-	 * @throws NumberFormatException
-	 */
-	public float getFloat(final int index) throws NumberFormatException {
-		return Float.parseFloat(getString(index));
-	}
+        /**
+         * Try to parse the argument to an int
+         *
+         * @param index
+         * @return
+         * @throws NumberFormatException
+         */
+        public int getInt(final int index) throws NumberFormatException {
+                return Integer.parseInt(getString(index));
+        }
 
-	/**
-	 * Try to parse the argument to a double
-	 * 
-	 * @param index
-	 * @return
-	 * @throws NumberFormatException
-	 */
-	public double getDouble(final int index) throws NumberFormatException {
-		return Double.parseDouble(getString(index));
-	}
+        /**
+         * Try to parse the argument to a float
+         *
+         * @param index
+         * @return
+         * @throws NumberFormatException
+         */
+        public float getFloat(final int index) throws NumberFormatException {
+                return Float.parseFloat(getString(index));
+        }
 
-	/**
-	 * Try to parse the argument to a long
-	 * 
-	 * @param index
-	 * @return
-	 * @throws NumberFormatException
-	 */
-	public long getLong(final int index) throws NumberFormatException {
-		return Long.parseLong(getString(index));
-	}
+        /**
+         * Try to parse the argument to a double
+         *
+         * @param index
+         * @return
+         * @throws NumberFormatException
+         */
+        public double getDouble(final int index) throws NumberFormatException {
+                return Double.parseDouble(getString(index));
+        }
 
-	/**
-	 * Check if the arguments contain the wanted flagF
-	 * 
-	 * @param ch
-	 *            flag to be searched
-	 * @return true if found.
-	 */
-	public boolean hasFlag(final char ch) {
-		return booleanFlags.contains(Character.toLowerCase(ch))
-				|| valueFlags.containsKey(Character.toLowerCase(ch));
-	}
+        /**
+         * Try to parse the argument to a long
+         *
+         * @param index
+         * @return
+         * @throws NumberFormatException
+         */
+        public long getLong(final int index) throws NumberFormatException {
+                return Long.parseLong(getString(index));
+        }
 
-	/**
-	 * Get the Value associated with the given flag and remove the flag from the
-	 * normal arguments.
-	 * 
-	 * @param flag
-	 *            flag to look for.
-	 * @return null if not found else the value of the flag
-	 */
-	public String getValueFlag(final char flag) {
-		final String result = valueFlags.get(Character.toLowerCase(flag));
-		if (result == null) {
-			return null;
-		}
-		if (parsedArgs.remove(result)) {
-			length--;
-		}
-		return result;
-	}
+        /**
+         * Check if the arguments contain the wanted flagF
+         *
+         * @param ch flag to be searched
+         * @return true if found.
+         */
+        public boolean hasFlag(final char ch) {
+                return booleanFlags.contains(Character.toLowerCase(ch))
+                        || valueFlags.containsKey(Character.toLowerCase(ch));
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return Arrays.toString(parsedArgs.toArray(new String[] {}))
-				+ " BoolFlags : "
-				+ Arrays.toString(booleanFlags.toArray(new Character[] {}))
-				+ " ValFlags : "
-				+ (valueFlags.isEmpty() ? "[]" : "[" + valueFlagsToString()
-						+ "]");
-	}
+        /**
+         * Get the Value associated with the given flag and remove the flag from
+         * the normal arguments.
+         *
+         * @param flag flag to look for.
+         * @return null if not found else the value of the flag
+         */
+        public String getValueFlag(final char flag) {
+                final String result = valueFlags.get(Character.toLowerCase(flag));
+                if (result == null) {
+                        return null;
+                }
+                if (parsedArgs.remove(result)) {
+                        length--;
+                }
+                return result;
+        }
 
-	private String valueFlagsToString() {
-		final StringBuffer buffer = new StringBuffer();
-		for (final Entry<Character, String> entry : valueFlags.entrySet()) {
-			buffer.append(entry.getKey()).append("->").append(entry.getValue())
-					.append(", ");
-		}
-		buffer.deleteCharAt(buffer.length() - 1).deleteCharAt(
-				buffer.length() - 1);
-		return buffer.toString();
-	}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+                return Arrays.toString(parsedArgs.toArray(new String[]{}))
+                        + " BoolFlags : "
+                        + Arrays.toString(booleanFlags.toArray(new Character[]{}))
+                        + " ValFlags : "
+                        + (valueFlags.isEmpty() ? "[]" : "[" + valueFlagsToString()
+                        + "]");
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Iterable#iterator()
-	 */
-	@Override
-	public Iterator<String> iterator() {
-		return parsedArgs.iterator();
-	}
+        private String valueFlagsToString() {
+                final StringBuffer buffer = new StringBuffer();
+                for (final Entry<Character, String> entry : valueFlags.entrySet()) {
+                        buffer.append(entry.getKey()).append("->").append(entry.getValue())
+                                .append(", ");
+                }
+                buffer.deleteCharAt(buffer.length() - 1).deleteCharAt(
+                        buffer.length() - 1);
+                return buffer.toString();
+        }
 
-	public String concatWithout(final int index) {
-		final StringBuffer buffer = new StringBuffer();
-		for (int i = 0; i < args.length; i++) {
-			if (i == index) {
-				continue;
-			}
-			buffer.append(args[i]).append(" ");
-		}
-		return buffer.toString().trim();
-	}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Iterable#iterator()
+         */
+        @Override
+        public Iterator<String> iterator() {
+                return parsedArgs.iterator();
+        }
 
-	public String concat() {
-		return Joiner.on(' ').join(args);
-	}
+        public String concatWithout(final int index) {
+                final StringBuffer buffer = new StringBuffer();
+                for (int i = 0; i < args.length; i++) {
+                        if (i == index) {
+                                continue;
+                        }
+                        buffer.append(args[i]).append(" ");
+                }
+                return buffer.toString().trim();
+        }
+
+        public String concat() {
+                return Joiner.on(' ').join(args);
+        }
 }

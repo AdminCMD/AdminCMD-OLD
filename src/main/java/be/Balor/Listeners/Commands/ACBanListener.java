@@ -1,19 +1,20 @@
-/************************************************************************
+/**
+ * **********************************************************************
  * This file is part of AdminCmd.
  *
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * AdminCmd is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.
- ************************************************************************/
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.Listeners.Commands;
 
 import org.bukkit.entity.Player;
@@ -30,36 +31,37 @@ import be.Balor.bukkit.AdminCmd.ConfigEnum;
 
 /**
  * @author Balor (aka Antoine Aflalo)
- * 
+ *
  */
 public class ACBanListener implements Listener {
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onPlayerLogin(final PlayerLoginEvent event) {
-		if (!event.getResult().equals(Result.ALLOWED)) {
-			return;
-		}
-		final Player player = event.getPlayer();
-		IBan ban = ACHelper.getInstance().getBan(player.getUniqueId().toString());
-		if (ban == null) {
-			try {
-				ban = ACHelper.getInstance().getBan(event.getAddress().toString().substring(1));
-			} catch (final NoSuchMethodError e) {
-			}
 
-		}
-		if (ban != null) {
-			String reason;
-			if (ban instanceof ITempBan) {
-				final ITempBan banTemp = (ITempBan) ban;
-				reason = banTemp.getReason() + " "
-						+ banTemp.getReadableTimeLeft();
-			} else {
-				reason = ban.getReason();
-			}
-			if (ConfigEnum.ADD_BANNER_IN_BAN.getBoolean()) {
-				reason += " by " + ban.getBanner();
-			}
-			event.disallow(Result.KICK_BANNED, reason);
-		}
-	}
+        @EventHandler(priority = EventPriority.HIGHEST)
+        public void onPlayerLogin(final PlayerLoginEvent event) {
+                if (!event.getResult().equals(Result.ALLOWED)) {
+                        return;
+                }
+                final Player player = event.getPlayer();
+                IBan ban = ACHelper.getInstance().getBan(player.getUniqueId().toString());
+                if (ban == null) {
+                        try {
+                                ban = ACHelper.getInstance().getBan(event.getAddress().toString().substring(1));
+                        } catch (final NoSuchMethodError e) {
+                        }
+
+                }
+                if (ban != null) {
+                        String reason;
+                        if (ban instanceof ITempBan) {
+                                final ITempBan banTemp = (ITempBan) ban;
+                                reason = banTemp.getReason() + " "
+                                        + banTemp.getReadableTimeLeft();
+                        } else {
+                                reason = ban.getReason();
+                        }
+                        if (ConfigEnum.ADD_BANNER_IN_BAN.getBoolean()) {
+                                reason += " by " + ban.getBanner();
+                        }
+                        event.disallow(Result.KICK_BANNED, reason);
+                }
+        }
 }

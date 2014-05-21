@@ -1,19 +1,20 @@
-/************************************************************************
- * This file is part of AdminCmd.									
- *																		
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by	
- * the Free Software Foundation, either version 3 of the License, or		
- * (at your option) any later version.									
- *																		
- * AdminCmd is distributed in the hope that it will be useful,	
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the			
- * GNU General Public License for more details.							
- *																		
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.
- ************************************************************************/
+/**
+ * **********************************************************************
+ * This file is part of AdminCmd.
+ *
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.Tools.Lister;
 
 import be.Balor.Player.IBan;
@@ -31,59 +32,60 @@ import org.bukkit.OfflinePlayer;
 
 /**
  * @author Balor (aka Antoine Aflalo)
- * 
+ *
  */
 public class BanLister extends Lister {
-	private final Map<String, String> ban = new TreeMap<String, String>();
 
-	/**
-	 * 
-	 */
-	BanLister() {
-		update();
-	}
+        private final Map<String, String> ban = new TreeMap<String, String>();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see be.Balor.Tools.Lister.Lister#update()
-	 */
-	@Override
-	public synchronized void update() {
-		ban.clear();
-		final Collection<IBan> banned = ACHelper.getInstance()
-				.getBannedPlayers();
-		final HashMap<String, String> replace = new HashMap<String, String>();
-		for (final IBan p : banned) {
-			replace.clear();
+        /**
+         *
+         */
+        BanLister() {
+                update();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see be.Balor.Tools.Lister.Lister#update()
+         */
+        @Override
+        public synchronized void update() {
+                ban.clear();
+                final Collection<IBan> banned = ACHelper.getInstance()
+                        .getBannedPlayers();
+                final HashMap<String, String> replace = new HashMap<String, String>();
+                for (final IBan p : banned) {
+                        replace.clear();
                         OfflinePlayer op = ACPluginManager.getServer().getOfflinePlayer(UUID.fromString(p.getPlayer()));
-			replace.put("player", op.getName());
-			replace.put("reason", p.getReason());
-			replace.put("banner", p.getBanner());
-			replace.put("date", Utils.replaceDateAndTimeFormat(p.getDate()));
-			ban.put(p.getPlayer(), LocaleHelper.BANLIST.getLocale(replace));
-		}
+                        replace.put("player", op.getName());
+                        replace.put("reason", p.getReason());
+                        replace.put("banner", p.getBanner());
+                        replace.put("date", Utils.replaceDateAndTimeFormat(p.getDate()));
+                        ban.put(p.getPlayer(), LocaleHelper.BANLIST.getLocale(replace));
+                }
 
-	}
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see be.Balor.Tools.Lister.Lister#getList()
-	 */
-	@Override
-	Collection<String> getList() {
-		return Collections.unmodifiableCollection(ban.values());
-	}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see be.Balor.Tools.Lister.Lister#getList()
+         */
+        @Override
+        Collection<String> getList() {
+                return Collections.unmodifiableCollection(ban.values());
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see be.Balor.Tools.Lister.Lister#getType()
-	 */
-	@Override
-	List getType() {
-		return Lister.List.BAN;
-	}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see be.Balor.Tools.Lister.Lister#getType()
+         */
+        @Override
+        List getType() {
+                return Lister.List.BAN;
+        }
 
 }

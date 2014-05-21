@@ -1,19 +1,20 @@
-/** **********************************************************************
+/**
+ * **********************************************************************
  * This file is part of AdminCmd.
  *
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * AdminCmd is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd. If not, see <http://www.gnu.org/licenses/>.
- *********************************************************************** */
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.Tools.Compatibility.Reflect;
 
 /**
@@ -48,13 +49,10 @@ public class FieldUtils {
         /**
          * Get the field from the wanted object
          *
-         * @param object
-         * - given object
-         * @param field
-         * - given field
+         * @param object - given object
+         * @param field - given field
          * @return the attribute casted as wanted.
-         * @throws FieldAccessException
-         * if we can't get the field
+         * @throws FieldAccessException if we can't get the field
          */
         @SuppressWarnings("unchecked")
         public static <T> T getAttribute(final Object object, final String field) {
@@ -63,34 +61,33 @@ public class FieldUtils {
                         return (T) getAttributeFromField(object, objectField);
                 } catch (final Exception e) {
                         throw new FieldAccessException("Can't get field " + field
-                                        + " from " + object, e);
+                                + " from " + object, e);
                 }
         }
 
         @SuppressWarnings("unchecked")
         public static <T> T getAttribute(final Object object,
-                        final FuzzyFieldContract contract) {
+                final FuzzyFieldContract contract) {
                 try {
                         final Field objectField = getMatchedField(object.getClass(),
-                                        contract);
+                                contract);
                         return (T) getAttributeFromField(object, objectField);
                 } catch (final Exception e) {
                         throw new FieldAccessException("Can't get field " + contract
-                                        + " from " + object, e);
+                                + " from " + object, e);
                 }
         }
 
         /**
          * Get the value of the field
          *
-         * @param object
-         * can be null if objectField is a static field
+         * @param object can be null if objectField is a static field
          * @param objectField
          * @return
          * @throws IllegalAccessException
          */
         private static Object getAttributeFromField(final Object object,
-                        final Field objectField) throws IllegalAccessException {
+                final Field objectField) throws IllegalAccessException {
                 objectField.setAccessible(true);
                 final Object obj = objectField.get(object);
                 objectField.setAccessible(false);
@@ -100,59 +97,50 @@ public class FieldUtils {
         /**
          * Set the field from the wanted object
          *
-         * @param object
-         * - given object
-         * @param field
-         * - given field
-         * @throws FieldAccessException
-         * if we can't set the field
+         * @param object - given object
+         * @param field - given field
+         * @throws FieldAccessException if we can't set the field
          */
         public static void setExactAttribute(final Object object,
-                        final String field, final Object value) {
+                final String field, final Object value) {
                 try {
                         final Field objectField = getExactField(object.getClass(), field);
                         setAttribute(object, value, objectField);
                 } catch (final Exception e) {
                         throw new FieldAccessException("Can't set field " + field
-                                        + " from " + object, e);
+                                + " from " + object, e);
                 }
         }
 
         /**
          * Set the field from the wanted object
          *
-         * @param object
-         * - given object
-         * @param contract
-         * - given field
-         * @throws FieldAccessException
-         * if we can't set the field
+         * @param object - given object
+         * @param contract - given field
+         * @throws FieldAccessException if we can't set the field
          */
         public static void setMatchedAttribute(final Object object,
-                        final FuzzyFieldContract contract, final Object value) {
+                final FuzzyFieldContract contract, final Object value) {
                 try {
                         final Field objectField = getMatchedField(object.getClass(),
-                                        contract);
+                                contract);
                         setAttribute(object, value, objectField);
                 } catch (final Exception e) {
                         throw new FieldAccessException("Can't set field " + contract
-                                        + " from " + object, e);
+                                + " from " + object, e);
                 }
         }
 
         /**
          * Set the attribute of an object
          *
-         * @param object
-         * the object
-         * @param value
-         * the new value
-         * @param objectField
-         * the field to change
+         * @param object the object
+         * @param value the new value
+         * @param objectField the field to change
          * @throws IllegalAccessException
          */
         public static void setAttribute(final Object object, final Object value,
-                        final Field objectField) throws IllegalAccessException {
+                final Field objectField) throws IllegalAccessException {
                 objectField.setAccessible(true);
                 objectField.set(object, value);
                 objectField.setAccessible(false);
@@ -168,7 +156,7 @@ public class FieldUtils {
          * @throws NoSuchFieldException
          */
         public static Field getExactField(final Class<?> source, final String field)
-                        throws SecurityException, NoSuchFieldException {
+                throws SecurityException, NoSuchFieldException {
                 Field objectField;
                 Class<?> clazz = source;
                 try {
@@ -197,7 +185,7 @@ public class FieldUtils {
          * @return
          */
         public static Field getMatchedField(final Class<?> source,
-                        final FuzzyFieldContract contract) {
+                final FuzzyFieldContract contract) {
                 Class<?> clazz = source;
                 FuzzyReflection reflect = FuzzyReflection.fromClass(clazz, true);
                 Field objectField;
@@ -256,14 +244,14 @@ public class FieldUtils {
          * @return
          */
         public static Field getField(final Class<?> source, final String field,
-                        final boolean accessible) {
+                final boolean accessible) {
                 try {
                         final Field toGet = getExactField(source, field);
                         toGet.setAccessible(accessible);
                         return toGet;
                 } catch (final Exception e) {
                         throw new FieldAccessException("Can't get " + field + " of "
-                                        + source, e);
+                                + source, e);
                 }
         }
 
@@ -277,12 +265,12 @@ public class FieldUtils {
          */
         @SuppressWarnings("unchecked")
         public static <T> T readField(final Field field, final Object object,
-                        final boolean b) {
+                final boolean b) {
                 try {
                         return (T) getAttributeFromField(object, field);
                 } catch (final IllegalAccessException e) {
                         throw new FieldAccessException("Can't read value of field " + field
-                                        + " from " + object, e);
+                                + " from " + object, e);
                 }
         }
 
@@ -294,12 +282,12 @@ public class FieldUtils {
          * @param value
          */
         public static void writeField(final Field field, final Object object,
-                        final Object value) {
+                final Object value) {
                 try {
                         setAttribute(object, value, field);
                 } catch (final IllegalAccessException e) {
                         throw new FieldAccessException("Can't set value of field " + field
-                                        + " from " + object, e);
+                                + " from " + object, e);
                 }
         }
 
@@ -311,8 +299,8 @@ public class FieldUtils {
         public static SimpleCommandMap getCommandMap() {
                 final Server server = ACPluginManager.getServer();
                 final FuzzyFieldContract contract = FuzzyFieldContract.newBuilder()
-                                .declaringClassDerivedOf(PluginManager.class)
-                                .typeDerivedOf(CommandMap.class).build();
+                        .declaringClassDerivedOf(PluginManager.class)
+                        .typeDerivedOf(CommandMap.class).build();
                 return getAttribute(server.getPluginManager(), contract);
         }
 

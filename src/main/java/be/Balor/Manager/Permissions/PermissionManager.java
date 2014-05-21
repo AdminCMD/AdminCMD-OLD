@@ -1,19 +1,20 @@
-/** **********************************************************************
+/**
+ * **********************************************************************
  * This file is part of AdminCmd.
  *
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * AdminCmd is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd. If not, see <http://www.gnu.org/licenses/>.
- *********************************************************************** */
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.Manager.Permissions;
 
 import be.Balor.Manager.Exceptions.NoPermissionsPlugin;
@@ -49,7 +50,7 @@ public class PermissionManager {
                 DebugLog.beginInfo("[" + p.getName() + "] Check Limit : " + limit);
                 try {
                         final String limitFound = permissionHandler.getPermissionLimit(p,
-                                        limit);
+                                limit);
                         DebugLog.addInfo("Limit found : " + limitFound);
                         return limitFound;
                 } finally {
@@ -71,12 +72,12 @@ public class PermissionManager {
         }
 
         public static boolean hasPerm(final CommandSender player,
-                        final Permission perm) throws NullPointerException {
+                final Permission perm) throws NullPointerException {
                 return hasPerm(player, perm, true);
         }
 
         public static boolean hasPerm(final CommandSender player,
-                        final PermChild perm) throws NullPointerException {
+                final PermChild perm) throws NullPointerException {
                 return hasPerm(player, perm, true);
         }
 
@@ -87,13 +88,13 @@ public class PermissionManager {
          * @return
          */
         public static boolean hasPerm(final CommandSender sender,
-                        final PermChild permChild, final boolean msg) {
+                final PermChild permChild, final boolean msg) {
                 return hasPerm(sender, permChild.getPermName(), true);
         }
 
         public static boolean hasPerm(final CommandSender player,
-                        final Permission perm, final boolean errorMsg)
-                        throws NullPointerException {
+                final Permission perm, final boolean errorMsg)
+                throws NullPointerException {
                 if (perm == null) {
                         throw new NullPointerException("The Permission Node can't be NULL");
                 }
@@ -101,10 +102,10 @@ public class PermissionManager {
                         throw new NullPointerException("The CommandSender can't be NULL");
                 }
                 DebugLog.beginInfo("[" + player.getName() + "] Check Permission : "
-                                + perm);
+                        + perm);
                 try {
                         final boolean result = permissionHandler.hasPerm(player, perm,
-                                        errorMsg);
+                                errorMsg);
                         DebugLog.addInfo("Result : " + result);
                         return result;
                 } finally {
@@ -117,36 +118,29 @@ public class PermissionManager {
          * Check the permission with an error message if the user don't have the
          * Permission
          *
-         * @param player
-         * player to check the permission
-         * @param perm
-         * permission node
+         * @param player player to check the permission
+         * @param perm permission node
          * @return if the user have or not the permission
-         * @throws NullPointerException
-         * when the permission node is null
+         * @throws NullPointerException when the permission node is null
          */
         public static boolean hasPerm(final CommandSender player, final String perm)
-                        throws NullPointerException {
+                throws NullPointerException {
                 return hasPerm(player, perm, true);
         }
 
         /**
          * Check the permission with the possibility to disable the error msg
          *
-         * @param player
-         * player to check the permission
-         * @param perm
-         * permission node
-         * @param errorMsg
-         * send or not an error message to the user if he don't have the
-         * permission
+         * @param player player to check the permission
+         * @param perm permission node
+         * @param errorMsg send or not an error message to the user if he don't
+         * have the permission
          * @return if the user have or not the permission
-         * @throws NullPointerException
-         * when the permission node is null
+         * @throws NullPointerException when the permission node is null
          */
         public static boolean hasPerm(final CommandSender player,
-                        final String perm, final boolean errorMsg)
-                        throws NullPointerException {
+                final String perm, final boolean errorMsg)
+                throws NullPointerException {
                 if (perm == null) {
                         throw new NullPointerException("The Permission Node can't be NULL");
                 }
@@ -154,10 +148,10 @@ public class PermissionManager {
                         throw new NullPointerException("The CommandSender can't be NULL");
                 }
                 DebugLog.beginInfo("[" + player.getName() + "] Check Permission : "
-                                + perm);
+                        + perm);
                 try {
                         final boolean result = permissionHandler.hasPerm(player, perm,
-                                        errorMsg);
+                                errorMsg);
                         DebugLog.addInfo("Result : " + result);
                         return result;
                 } finally {
@@ -167,7 +161,7 @@ public class PermissionManager {
         }
 
         public static boolean isInGroup(final String groupName, final Player player)
-                        throws NoPermissionsPlugin {
+                throws NoPermissionsPlugin {
                 return permissionHandler.isInGroup(groupName, player);
         }
 
@@ -210,7 +204,7 @@ public class PermissionManager {
                 final WeakReference<PermissionLinker> ref = permissionLinkers.get(name);
                 if (ref != null) {
                         if (ref.get() == null) {
-				// Hashtable holds stale weak reference
+                                // Hashtable holds stale weak reference
                                 // to a logger which has been GC-ed.
                                 // Allow to register new one.
                                 permissionLinkers.remove(name);
@@ -219,7 +213,7 @@ public class PermissionManager {
                                 return false;
                         }
                 }
-		// We're adding a new logger.
+                // We're adding a new logger.
                 // Note that we are creating a weak reference here.
                 permissionLinkers.put(name, new WeakReference<PermissionLinker>(perm));
                 return true;
@@ -242,7 +236,7 @@ public class PermissionManager {
                 }
                 final PermissionLinker perm = ref.get();
                 if (perm == null) {
-			// Hashtable holds stale weak reference
+                        // Hashtable holds stale weak reference
                         // to a logger which has been GC-ed.
                         permissionLinkers.remove(name);
                 }

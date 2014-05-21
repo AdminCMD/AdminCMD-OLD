@@ -1,19 +1,20 @@
-/************************************************************************
- * This file is part of AdminCmd.									
- *																		
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by	
- * the Free Software Foundation, either version 3 of the License, or		
- * (at your option) any later version.									
- *																		
- * AdminCmd is distributed in the hope that it will be useful,	
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the			
- * GNU General Public License for more details.							
- *																		
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.
- ************************************************************************/
+/**
+ * **********************************************************************
+ * This file is part of AdminCmd.
+ *
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.Manager.Permissions;
 
 import java.io.File;
@@ -38,188 +39,190 @@ import be.Balor.bukkit.AdminCmd.ACPluginManager;
 
 /**
  * @author Balor (aka Antoine Aflalo)
- * 
+ *
  */
 public class PermParent extends PermChild {
-	protected final String compareName;
-	private final Map<String, Boolean> children = new HashMap<String, Boolean>();
-	private static Pattern permRegex = Pattern.compile("admincmd\\.\\w+\\.(.+)");
-	private final Set<PermParent> permParentChildren = new HashSet<PermParent>();
-	private boolean registered = false;
-	static final ExtendedConfiguration permYML;
-	private final ExConfigurationSection permParentSection;
-	static {
-		final File permFile = new File(ACPluginManager.getCorePlugin().getDataFolder(), "permissions.yml");
-		if (permFile.exists()) {
-			permFile.delete();
-		}
-		permYML = ExtendedConfiguration.loadConfiguration(permFile);
-	}
 
-	public PermParent(final String perm) {
-		this(perm, perm == null ? null : perm.substring(0, perm.length() - 1), PermissionDefault.OP);
-	}
+        protected final String compareName;
+        private final Map<String, Boolean> children = new HashMap<String, Boolean>();
+        private static Pattern permRegex = Pattern.compile("admincmd\\.\\w+\\.(.+)");
+        private final Set<PermParent> permParentChildren = new HashSet<PermParent>();
+        private boolean registered = false;
+        static final ExtendedConfiguration permYML;
+        private final ExConfigurationSection permParentSection;
 
-	public PermParent(final String perm, final String compare, final PermissionDefault def) {
-		super(perm, def);
-		this.compareName = compare;
-		this.permParentSection = permYML.addSection(this.compareName.replaceAll("\\.", "_"));
-		final ExConfigurationSection section = this.permParentSection.addSection("*");
-		section.add("type", "Group Node");
-		section.add("node", getPermName());
-		section.add("default", def.toString());
+        static {
+                final File permFile = new File(ACPluginManager.getCorePlugin().getDataFolder(), "permissions.yml");
+                if (permFile.exists()) {
+                        permFile.delete();
+                }
+                permYML = ExtendedConfiguration.loadConfiguration(permFile);
+        }
 
-	}
+        public PermParent(final String perm) {
+                this(perm, perm == null ? null : perm.substring(0, perm.length() - 1), PermissionDefault.OP);
+        }
 
-	/**
-	 * @return the compareName
-	 */
-	public String getCompareName() {
-		return compareName;
-	}
+        public PermParent(final String perm, final String compare, final PermissionDefault def) {
+                super(perm, def);
+                this.compareName = compare;
+                this.permParentSection = permYML.addSection(this.compareName.replaceAll("\\.", "_"));
+                final ExConfigurationSection section = this.permParentSection.addSection("*");
+                section.add("type", "Group Node");
+                section.add("node", getPermName());
+                section.add("default", def.toString());
 
-	/**
-	 * Add a permission Child to the Permission Parent
-	 * 
-	 * @param perm
-	 * @return the PermParent (this)
-	 */
-	public PermParent addChild(final PermChild perm) throws IllegalArgumentException {
-		if (perm.equals(this)) {
-			throw new IllegalArgumentException("The Child can't be the parent.");
-		}
-		children.put(perm.getPermName(), true);
-		if (perm instanceof PermParent) {
-			permParentChildren.add((PermParent) perm);
-		}
-		perm.parent = this;
-		addPermFileEntry(perm);
-		return this;
-	}
+        }
 
-	/**
-	 * @param perm
-	 */
-	private void addPermFileEntry(final PermChild perm) {
-		String foundPerm = null;
-		final Matcher regexMatcher = permRegex.matcher(perm.getPermName());
-		if (regexMatcher.find()) {
-			foundPerm = regexMatcher.group(1);
-			final ExConfigurationSection permSection = permParentSection.addSection(foundPerm);
-			final CoreCommand pluginCommand = perm.getPluginCommand();
-			permSection.add("node", perm.getPermName());
-			permSection.add("default", perm.getPermDefault().toString());
-			if (pluginCommand != null) {
-				final HelpEntry helpEntry = HelpLister.getInstance().getHelpEntry(pluginCommand.getPlugin().getPluginName(), pluginCommand.getCmdName());
-				if (helpEntry != null) {
-					permSection.add("description", helpEntry.getDescription());
-					permSection.add("command", helpEntry.getCommand());
-				} else {
-					permSection.add("description", "TO COMPLETE");
-					permSection.add("command", "MISSING");
-				}
-				permSection.add("cmd_name", pluginCommand.getCmdName());
-			}
-		}
-	}
+        /**
+         * @return the compareName
+         */
+        public String getCompareName() {
+                return compareName;
+        }
 
-	/**
-	 * Register the permParent.
-	 * 
-	 * @return
-	 */
-	public void registerPermission() {
-		DebugLog.beginInfo("Registering PermParent : " + this.permName);
-		try {
-			if (registered) {
-				return;
-			}
-			for (final PermParent perm : permParentChildren) {
-				perm.registerPermission();
-			}
-			Permission bukkitPerm = new Permission(this.permName, this.permissionDefault, children);
-			DebugLog.beginInfo("Children : ");
-			for (final String perm : children.keySet()) {
-				DebugLog.addInfo(perm);
-			}
-			DebugLog.endInfo();
-			try {
-				ACPluginManager.getServer().getPluginManager().addPermission(bukkitPerm);
-			} catch (final Exception e) {
-				DebugLog.INSTANCE.warning("Trying to register an existing PermParent : " + this.permName);
-				bukkitPerm = Bukkit.getPluginManager().getPermission(permName);
-				bukkitPerm.getChildren().putAll(children);
-				bukkitPerm.recalculatePermissibles();
-			}
-			registered = true;
-		} finally {
-			DebugLog.endInfo();
-		}
-	}
+        /**
+         * Add a permission Child to the Permission Parent
+         *
+         * @param perm
+         * @return the PermParent (this)
+         */
+        public PermParent addChild(final PermChild perm) throws IllegalArgumentException {
+                if (perm.equals(this)) {
+                        throw new IllegalArgumentException("The Child can't be the parent.");
+                }
+                children.put(perm.getPermName(), true);
+                if (perm instanceof PermParent) {
+                        permParentChildren.add((PermParent) perm);
+                }
+                perm.parent = this;
+                addPermFileEntry(perm);
+                return this;
+        }
 
-	/**
-	 * Add a permission Child to the Permission Parent
-	 * 
-	 * @param perm
-	 * @return the PermParent (this)
-	 */
-	public PermParent addChild(final String perm) {
-		this.addChild(new PermChild(perm));
-		return this;
-	}
+        /**
+         * @param perm
+         */
+        private void addPermFileEntry(final PermChild perm) {
+                String foundPerm = null;
+                final Matcher regexMatcher = permRegex.matcher(perm.getPermName());
+                if (regexMatcher.find()) {
+                        foundPerm = regexMatcher.group(1);
+                        final ExConfigurationSection permSection = permParentSection.addSection(foundPerm);
+                        final CoreCommand pluginCommand = perm.getPluginCommand();
+                        permSection.add("node", perm.getPermName());
+                        permSection.add("default", perm.getPermDefault().toString());
+                        if (pluginCommand != null) {
+                                final HelpEntry helpEntry = HelpLister.getInstance().getHelpEntry(pluginCommand.getPlugin().getPluginName(), pluginCommand.getCmdName());
+                                if (helpEntry != null) {
+                                        permSection.add("description", helpEntry.getDescription());
+                                        permSection.add("command", helpEntry.getCommand());
+                                } else {
+                                        permSection.add("description", "TO COMPLETE");
+                                        permSection.add("command", "MISSING");
+                                }
+                                permSection.add("cmd_name", pluginCommand.getCmdName());
+                        }
+                }
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see be.Balor.Manager.Permissions.PermChild#getPermDefault()
-	 */
-	@Override
-	public PermissionDefault getPermDefault() {
-		return this.permissionDefault;
-	}
+        /**
+         * Register the permParent.
+         *
+         * @return
+         */
+        public void registerPermission() {
+                DebugLog.beginInfo("Registering PermParent : " + this.permName);
+                try {
+                        if (registered) {
+                                return;
+                        }
+                        for (final PermParent perm : permParentChildren) {
+                                perm.registerPermission();
+                        }
+                        Permission bukkitPerm = new Permission(this.permName, this.permissionDefault, children);
+                        DebugLog.beginInfo("Children : ");
+                        for (final String perm : children.keySet()) {
+                                DebugLog.addInfo(perm);
+                        }
+                        DebugLog.endInfo();
+                        try {
+                                ACPluginManager.getServer().getPluginManager().addPermission(bukkitPerm);
+                        } catch (final Exception e) {
+                                DebugLog.INSTANCE.warning("Trying to register an existing PermParent : " + this.permName);
+                                bukkitPerm = Bukkit.getPluginManager().getPermission(permName);
+                                bukkitPerm.getChildren().putAll(children);
+                                bukkitPerm.recalculatePermissibles();
+                        }
+                        registered = true;
+                } finally {
+                        DebugLog.endInfo();
+                }
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((compareName == null) ? 0 : compareName.hashCode());
-		result = prime * result + (registered ? 1231 : 1237);
-		return result;
-	}
+        /**
+         * Add a permission Child to the Permission Parent
+         *
+         * @param perm
+         * @return the PermParent (this)
+         */
+        public PermParent addChild(final String perm) {
+                this.addChild(new PermChild(perm));
+                return this;
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final PermParent other = (PermParent) obj;
-		if (compareName == null) {
-			if (other.compareName != null) {
-				return false;
-			}
-		} else if (!compareName.equals(other.compareName)) {
-			return false;
-		}
-		if (registered != other.registered) {
-			return false;
-		}
-		return true;
-	}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see be.Balor.Manager.Permissions.PermChild#getPermDefault()
+         */
+        @Override
+        public PermissionDefault getPermDefault() {
+                return this.permissionDefault;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+                final int prime = 31;
+                int result = super.hashCode();
+                result = prime * result + ((compareName == null) ? 0 : compareName.hashCode());
+                result = prime * result + (registered ? 1231 : 1237);
+                return result;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(final Object obj) {
+                if (this == obj) {
+                        return true;
+                }
+                if (!super.equals(obj)) {
+                        return false;
+                }
+                if (getClass() != obj.getClass()) {
+                        return false;
+                }
+                final PermParent other = (PermParent) obj;
+                if (compareName == null) {
+                        if (other.compareName != null) {
+                                return false;
+                        }
+                } else if (!compareName.equals(other.compareName)) {
+                        return false;
+                }
+                if (registered != other.registered) {
+                        return false;
+                }
+                return true;
+        }
 
 }

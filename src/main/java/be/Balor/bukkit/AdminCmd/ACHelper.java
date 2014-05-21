@@ -783,7 +783,7 @@ public class ACHelper {
                 } else {
                         pluginStarted = System.currentTimeMillis();
                 }
-                                              
+
                 for (final Player p : coreInstance.getServer().getOnlinePlayers()) {
                         PlayerManager.getInstance().setOnline(p);
                 }
@@ -1754,9 +1754,11 @@ public class ACHelper {
                 }
         }
 
-        private void convertFiles() {               
-                if(isSqlWrapper()) return;
-                
+        private void convertFiles() {
+                if (isSqlWrapper()) {
+                        return;
+                }
+
                 File folder = new File(getCoreInstance().getDataFolder(), "userData");
                 if (!folder.exists() || !folder.isDirectory()) {
                         return;
@@ -1764,42 +1766,42 @@ public class ACHelper {
 
                 for (File file : folder.listFiles()) {
                         DebugLog.beginInfo("Converting file " + file.getName());
-                                                
+
                         String name = file.getName().replace(".yml", "").trim();
-                        
+
                         DebugLog.addInfo("Trimmed fileName: " + name);
-                        
+
                         boolean isUUID = name.split("-").length >= 3;
-                        
+
                         DebugLog.addInfo("File needs to be converted: " + (isUUID ? "no" : "yes"));
-                        
+
                         if (isUUID) {
                                 DebugLog.endInfo();
                                 continue;
                         }
-                                            
+
                         DebugLog.addInfo("Getting OflinePlayer object from fileName " + name);
-                                                
+
                         OfflinePlayer op = getCoreInstance().getServer().getOfflinePlayer(name);
-                        
+
                         DebugLog.addInfo("OfflinePlayer uuid: " + op.getUniqueId());
-                        
+
                         File newFile = new File(folder, op.getUniqueId().toString() + ".yml");
-                        
+
                         DebugLog.addInfo("Renaming file " + file.getName() + " to " + newFile.getName());
-                        
-                        if(newFile.exists()) {
+
+                        if (newFile.exists()) {
                                 DebugLog.addInfo("File is already existing.");
                                 DebugLog.endInfo();
                                 file.delete();
                                 continue;
                         }
-                                                                                             
+
                         file.renameTo(newFile);
-                        
+
                         DebugLog.addInfo("Converting done!");
                         DebugLog.endInfo();
-                }               
+                }
         }
 
         private void convertFactory() {

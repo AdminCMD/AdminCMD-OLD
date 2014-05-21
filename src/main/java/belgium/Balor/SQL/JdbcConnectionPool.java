@@ -40,17 +40,16 @@ import be.Balor.Tools.Debug.DebugLog;
 /*## Java 1.7 ##
  import java.util.logging.Logger;
  //*/
-
 /**
  * A simple standalone JDBC connection pool. It is based on the <a
  * href="http://www.source-code.biz/snippets/java/8.htm">
  * MiniConnectionPoolManager written by Christian d'Heureuse (Java 1.5) </a>. It
  * is used as follows:
- * 
+ *
  * <pre>
  * import java.sql.*;
  * import org.h2.jdbcx.JdbcConnectionPool;
- * 
+ *
  * public class Test {
  * 	public static void main(String... args) throws Exception {
  * 		JdbcConnectionPool cp = JdbcConnectionPool.create(&quot;jdbc:h2:&tilde;/test&quot;,
@@ -64,310 +63,303 @@ import be.Balor.Tools.Debug.DebugLog;
  * 	}
  * }
  * </pre>
- * 
+ *
  * @author Christian d'Heureuse (<a
- *         href="http://www.source-code.biz">www.source-code.biz</a>)
+ * href="http://www.source-code.biz">www.source-code.biz</a>)
  * @author Thomas Mueller
  */
 public class JdbcConnectionPool implements DataSource, ConnectionEventListener {
 
-	private static final int DEFAULT_TIMEOUT = 30;
-	private static final int DEFAULT_MAX_CONNECTIONS = 10;
+        private static final int DEFAULT_TIMEOUT = 30;
+        private static final int DEFAULT_MAX_CONNECTIONS = 10;
 
-	private final ConnectionPoolDataSource dataSource;
-	private final List<PooledConnection> recycledConnections = new ArrayList<PooledConnection>();
-	private PrintWriter logWriter;
-	private int maxConnections = DEFAULT_MAX_CONNECTIONS;
-	private int timeout = DEFAULT_TIMEOUT;
-	private final AtomicInteger activeConnections = new AtomicInteger();;
+        private final ConnectionPoolDataSource dataSource;
+        private final List<PooledConnection> recycledConnections = new ArrayList<PooledConnection>();
+        private PrintWriter logWriter;
+        private int maxConnections = DEFAULT_MAX_CONNECTIONS;
+        private int timeout = DEFAULT_TIMEOUT;
+        private final AtomicInteger activeConnections = new AtomicInteger();
+        ;
 	private boolean isDisposed;
 
-	protected JdbcConnectionPool(final ConnectionPoolDataSource dataSource) {
-		this.dataSource = dataSource;
-		if (dataSource != null) {
-			try {
-				logWriter = dataSource.getLogWriter();
-			} catch (final SQLException e) {
-				// ignore
-			}
-		}
-	}
+        protected JdbcConnectionPool(final ConnectionPoolDataSource dataSource) {
+                this.dataSource = dataSource;
+                if (dataSource != null) {
+                        try {
+                                logWriter = dataSource.getLogWriter();
+                        } catch (final SQLException e) {
+                                // ignore
+                        }
+                }
+        }
 
-	/**
-	 * Constructs a new connection pool.
-	 * 
-	 * @param dataSource
-	 *            the data source to create connections
-	 * @return the connection pool
-	 */
-	public static JdbcConnectionPool create(
-			final ConnectionPoolDataSource dataSource) {
-		return new JdbcConnectionPool(dataSource);
-	}
+        /**
+         * Constructs a new connection pool.
+         *
+         * @param dataSource the data source to create connections
+         * @return the connection pool
+         */
+        public static JdbcConnectionPool create(
+                final ConnectionPoolDataSource dataSource) {
+                return new JdbcConnectionPool(dataSource);
+        }
 
-	// /**
-	// * Constructs a new connection pool for H2 databases.
-	// *
-	// * @param url
-	// * the database URL of the H2 connection
-	// * @param user
-	// * the user name
-	// * @param password
-	// * the password
-	// * @return the connection pool
-	// */
-	// public static JdbcConnectionPool create(final String url,
-	// final String user, final String password) {
-	// final JdbcDataSource ds = new JdbcDataSource();
-	// ds.setURL(url);
-	// ds.setUser(user);
-	// ds.setPassword(password);
-	// return new JdbcConnectionPool(ds);
-	// }
+        // /**
+        // * Constructs a new connection pool for H2 databases.
+        // *
+        // * @param url
+        // * the database URL of the H2 connection
+        // * @param user
+        // * the user name
+        // * @param password
+        // * the password
+        // * @return the connection pool
+        // */
+        // public static JdbcConnectionPool create(final String url,
+        // final String user, final String password) {
+        // final JdbcDataSource ds = new JdbcDataSource();
+        // ds.setURL(url);
+        // ds.setUser(user);
+        // ds.setPassword(password);
+        // return new JdbcConnectionPool(ds);
+        // }
+        /**
+         * Sets the maximum number of connections to use from now on. The
+         * default value is 10 connections.
+         *
+         * @param max the maximum number of connections
+         */
+        public synchronized void setMaxConnections(final int max) {
+                if (max < 1) {
+                        throw new IllegalArgumentException("Invalid maxConnections value: "
+                                + max);
+                }
+                this.maxConnections = max;
+                // notify waiting threads if the value was increased
+                notifyAll();
+        }
 
-	/**
-	 * Sets the maximum number of connections to use from now on. The default
-	 * value is 10 connections.
-	 * 
-	 * @param max
-	 *            the maximum number of connections
-	 */
-	public synchronized void setMaxConnections(final int max) {
-		if (max < 1) {
-			throw new IllegalArgumentException("Invalid maxConnections value: "
-					+ max);
-		}
-		this.maxConnections = max;
-		// notify waiting threads if the value was increased
-		notifyAll();
-	}
+        /**
+         * Gets the maximum number of connections to use.
+         *
+         * @return the max the maximum number of connections
+         */
+        public synchronized int getMaxConnections() {
+                return maxConnections;
+        }
 
-	/**
-	 * Gets the maximum number of connections to use.
-	 * 
-	 * @return the max the maximum number of connections
-	 */
-	public synchronized int getMaxConnections() {
-		return maxConnections;
-	}
+        /**
+         * Gets the maximum time in seconds to wait for a free connection.
+         *
+         * @return the timeout in seconds
+         */
+        @Override
+        public synchronized int getLoginTimeout() {
+                return timeout;
+        }
 
-	/**
-	 * Gets the maximum time in seconds to wait for a free connection.
-	 * 
-	 * @return the timeout in seconds
-	 */
-	@Override
-	public synchronized int getLoginTimeout() {
-		return timeout;
-	}
+        /**
+         * Sets the maximum time in seconds to wait for a free connection. The
+         * default timeout is 30 seconds. Calling this method with the value 0
+         * will set the timeout to the default value.
+         *
+         * @param seconds the timeout, 0 meaning the default
+         */
+        @Override
+        public synchronized void setLoginTimeout(int seconds) {
+                if (seconds == 0) {
+                        seconds = DEFAULT_TIMEOUT;
+                }
+                this.timeout = seconds;
+        }
 
-	/**
-	 * Sets the maximum time in seconds to wait for a free connection. The
-	 * default timeout is 30 seconds. Calling this method with the value 0 will
-	 * set the timeout to the default value.
-	 * 
-	 * @param seconds
-	 *            the timeout, 0 meaning the default
-	 */
-	@Override
-	public synchronized void setLoginTimeout(int seconds) {
-		if (seconds == 0) {
-			seconds = DEFAULT_TIMEOUT;
-		}
-		this.timeout = seconds;
-	}
+        /**
+         * Closes all unused pooled connections. Exceptions while closing are
+         * written to the log stream (if set).
+         */
+        public synchronized void dispose() {
+                if (isDisposed) {
+                        return;
+                }
+                isDisposed = true;
+                final List<PooledConnection> list = recycledConnections;
+                for (int i = 0, size = list.size(); i < size; i++) {
+                        closeConnection(list.get(i));
+                }
+        }
 
-	/**
-	 * Closes all unused pooled connections. Exceptions while closing are
-	 * written to the log stream (if set).
-	 */
-	public synchronized void dispose() {
-		if (isDisposed) {
-			return;
-		}
-		isDisposed = true;
-		final List<PooledConnection> list = recycledConnections;
-		for (int i = 0, size = list.size(); i < size; i++) {
-			closeConnection(list.get(i));
-		}
-	}
+        /**
+         * Retrieves a connection from the connection pool. If
+         * <code>maxConnections</code> connections are already in use, the
+         * method waits until a connection becomes available or
+         * <code>timeout</code> seconds elapsed. When the application is
+         * finished using the connection, it must close it in order to return it
+         * to the pool. If no connection becomes available within the given
+         * timeout, an exception with SQL state 08001 and vendor code 8001 is
+         * thrown.
+         *
+         * @return a new Connection object.
+         * @throws SQLException when a new connection could not be established,
+         * or a timeout occurred
+         */
+        @Override
+        public Connection getConnection() throws SQLException {
+                DebugLog.beginInfo("Connection asked");
+                DebugLog.addInfo("Active connections : " + activeConnections.get());
+                DebugLog.addInfo("Asked by : " + Thread.currentThread());
+                DebugLog.addInfo("Called by :\t"
+                        + Thread.currentThread().getStackTrace()[4].toString());
+                try {
+                        final long max = System.currentTimeMillis() + timeout * 1000;
+                        do {
+                                synchronized (this) {
+                                        if (activeConnections.get() < maxConnections) {
+                                                return getConnectionNow();
+                                        }
+                                        try {
+                                                wait(1000);
+                                        } catch (final InterruptedException e) {
+                                                // ignore
+                                        }
+                                }
+                        } while (System.currentTimeMillis() <= max);
+                        throw new SQLException("Login timeout", "08001", 8001);
+                } finally {
+                        DebugLog.endInfo();
+                }
+        }
 
-	/**
-	 * Retrieves a connection from the connection pool. If
-	 * <code>maxConnections</code> connections are already in use, the method
-	 * waits until a connection becomes available or <code>timeout</code>
-	 * seconds elapsed. When the application is finished using the connection,
-	 * it must close it in order to return it to the pool. If no connection
-	 * becomes available within the given timeout, an exception with SQL state
-	 * 08001 and vendor code 8001 is thrown.
-	 * 
-	 * @return a new Connection object.
-	 * @throws SQLException
-	 *             when a new connection could not be established, or a timeout
-	 *             occurred
-	 */
-	@Override
-	public Connection getConnection() throws SQLException {
-		DebugLog.beginInfo("Connection asked");
-		DebugLog.addInfo("Active connections : " + activeConnections.get());
-		DebugLog.addInfo("Asked by : " + Thread.currentThread());
-		DebugLog.addInfo("Called by :\t"
-				+ Thread.currentThread().getStackTrace()[4].toString());
-		try {
-			final long max = System.currentTimeMillis() + timeout * 1000;
-			do {
-				synchronized (this) {
-					if (activeConnections.get() < maxConnections) {
-						return getConnectionNow();
-					}
-					try {
-						wait(1000);
-					} catch (final InterruptedException e) {
-						// ignore
-					}
-				}
-			} while (System.currentTimeMillis() <= max);
-			throw new SQLException("Login timeout", "08001", 8001);
-		} finally {
-			DebugLog.endInfo();
-		}
-	}
+        /**
+         * INTERNAL
+         */
+        @Override
+        public Connection getConnection(final String user, final String password) {
+                throw new UnsupportedOperationException();
+        }
 
-	/**
-	 * INTERNAL
-	 */
-	@Override
-	public Connection getConnection(final String user, final String password) {
-		throw new UnsupportedOperationException();
-	}
+        private Connection getConnectionNow() throws SQLException {
+                if (isDisposed) {
+                        throw new IllegalStateException(
+                                "Connection pool has been disposed.");
+                }
+                PooledConnection pc;
+                if (!recycledConnections.isEmpty()) {
+                        pc = recycledConnections.remove(recycledConnections.size() - 1);
+                } else {
+                        pc = dataSource.getPooledConnection();
+                }
+                final Connection conn = pc.getConnection();
+                activeConnections.incrementAndGet();
+                pc.addConnectionEventListener(this);
+                return conn;
+        }
 
-	private Connection getConnectionNow() throws SQLException {
-		if (isDisposed) {
-			throw new IllegalStateException(
-					"Connection pool has been disposed.");
-		}
-		PooledConnection pc;
-		if (!recycledConnections.isEmpty()) {
-			pc = recycledConnections.remove(recycledConnections.size() - 1);
-		} else {
-			pc = dataSource.getPooledConnection();
-		}
-		final Connection conn = pc.getConnection();
-		activeConnections.incrementAndGet();
-		pc.addConnectionEventListener(this);
-		return conn;
-	}
+        /**
+         * This method usually puts the connection back into the pool. There are
+         * some exceptions: if the pool is disposed, the connection is disposed
+         * as well. If the pool is full, the connection is closed.
+         *
+         * @param pc the pooled connection
+         */
+        synchronized void recycleConnection(final PooledConnection pc) {
+                if (activeConnections.get() <= 0) {
+                        throw new AssertionError();
+                }
+                activeConnections.decrementAndGet();
+                if (!isDisposed && activeConnections.get() < maxConnections) {
+                        recycledConnections.add(pc);
+                } else {
+                        closeConnection(pc);
+                }
+                if (activeConnections.get() >= maxConnections - 1) {
+                        notifyAll();
+                }
+        }
 
-	/**
-	 * This method usually puts the connection back into the pool. There are
-	 * some exceptions: if the pool is disposed, the connection is disposed as
-	 * well. If the pool is full, the connection is closed.
-	 * 
-	 * @param pc
-	 *            the pooled connection
-	 */
-	synchronized void recycleConnection(final PooledConnection pc) {
-		if (activeConnections.get() <= 0) {
-			throw new AssertionError();
-		}
-		activeConnections.decrementAndGet();
-		if (!isDisposed && activeConnections.get() < maxConnections) {
-			recycledConnections.add(pc);
-		} else {
-			closeConnection(pc);
-		}
-		if (activeConnections.get() >= maxConnections - 1) {
-			notifyAll();
-		}
-	}
+        private void closeConnection(final PooledConnection pc) {
+                try {
+                        pc.close();
+                } catch (final SQLException e) {
+                        if (logWriter != null) {
+                                e.printStackTrace(logWriter);
+                        }
+                }
+        }
 
-	private void closeConnection(final PooledConnection pc) {
-		try {
-			pc.close();
-		} catch (final SQLException e) {
-			if (logWriter != null) {
-				e.printStackTrace(logWriter);
-			}
-		}
-	}
+        /**
+         * INTERNAL
+         */
+        @Override
+        public void connectionClosed(final ConnectionEvent event) {
+                final PooledConnection pc = (PooledConnection) event.getSource();
+                pc.removeConnectionEventListener(this);
+                recycleConnection(pc);
+        }
 
-	/**
-	 * INTERNAL
-	 */
-	@Override
-	public void connectionClosed(final ConnectionEvent event) {
-		final PooledConnection pc = (PooledConnection) event.getSource();
-		pc.removeConnectionEventListener(this);
-		recycleConnection(pc);
-	}
+        /**
+         * INTERNAL
+         */
+        @Override
+        public void connectionErrorOccurred(final ConnectionEvent event) {
+                // not used
+        }
 
-	/**
-	 * INTERNAL
-	 */
-	@Override
-	public void connectionErrorOccurred(final ConnectionEvent event) {
-		// not used
-	}
+        /**
+         * Returns the number of active (open) connections of this pool. This is
+         * the number of <code>Connection</code> objects that have been issued
+         * by getConnection() for which <code>Connection.close()</code> has not
+         * yet been called.
+         *
+         * @return the number of active connections.
+         */
+        public int getActiveConnections() {
+                return activeConnections.get();
+        }
 
-	/**
-	 * Returns the number of active (open) connections of this pool. This is the
-	 * number of <code>Connection</code> objects that have been issued by
-	 * getConnection() for which <code>Connection.close()</code> has not yet
-	 * been called.
-	 * 
-	 * @return the number of active connections.
-	 */
-	public int getActiveConnections() {
-		return activeConnections.get();
-	}
+        /**
+         * INTERNAL
+         */
+        @Override
+        public PrintWriter getLogWriter() {
+                return logWriter;
+        }
 
-	/**
-	 * INTERNAL
-	 */
-	@Override
-	public PrintWriter getLogWriter() {
-		return logWriter;
-	}
+        /**
+         * INTERNAL
+         */
+        @Override
+        public void setLogWriter(final PrintWriter logWriter) {
+                this.logWriter = logWriter;
+        }
 
-	/**
-	 * INTERNAL
-	 */
-	@Override
-	public void setLogWriter(final PrintWriter logWriter) {
-		this.logWriter = logWriter;
-	}
+        /**
+         * [Not supported] Return an object of this class if possible.
+         *
+         * @param iface the class
+         */
+        @Override
+        public <T> T unwrap(final Class<T> iface) throws SQLException {
+                // throw DbException.getUnsupportedException("unwrap");
+                throw new UnsupportedOperationException();
+        }
 
-	/**
-	 * [Not supported] Return an object of this class if possible.
-	 * 
-	 * @param iface
-	 *            the class
-	 */
-	@Override
-	public <T> T unwrap(final Class<T> iface) throws SQLException {
-		// throw DbException.getUnsupportedException("unwrap");
-		throw new UnsupportedOperationException();
-	}
+        /**
+         * [Not supported] Checks if unwrap can return an object of this class.
+         *
+         * @param iface the class
+         */
+        @Override
+        public boolean isWrapperFor(final Class<?> iface) throws SQLException {
+                // throw DbException.getUnsupportedException("isWrapperFor");
+                throw new UnsupportedOperationException();
+        }
 
-	/**
-	 * [Not supported] Checks if unwrap can return an object of this class.
-	 * 
-	 * @param iface
-	 *            the class
-	 */
-	@Override
-	public boolean isWrapperFor(final Class<?> iface) throws SQLException {
-		// throw DbException.getUnsupportedException("isWrapperFor");
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * [Not supported]
-	 */
-
-	@Override
-	public Logger getParentLogger() {
-		return null;
-	}
+        /**
+         * [Not supported]
+         */
+        @Override
+        public Logger getParentLogger() {
+                return null;
+        }
 
 }

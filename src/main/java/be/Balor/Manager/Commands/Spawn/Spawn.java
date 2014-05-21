@@ -1,19 +1,20 @@
-/************************************************************************
+/**
+ * **********************************************************************
  * This file is part of AdminCmd.
  *
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * AdminCmd is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.
- ************************************************************************/
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.Manager.Commands.Spawn;
 
 import java.util.HashMap;
@@ -39,112 +40,112 @@ import be.Balor.bukkit.AdminCmd.LocaleHelper;
 
 /**
  * @authors Balor, Lathanael
- * 
+ *
  */
 public class Spawn extends SpawnCommand {
 
-	/**
-	 *
-	 */
-	public Spawn() {
-		permNode = "admincmd.spawn.tp";
-		cmdName = "bal_spawn";
-	}
+        /**
+         *
+         */
+        public Spawn() {
+                permNode = "admincmd.spawn.tp";
+                cmdName = "bal_spawn";
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * be.Balor.Manager.ACCommands#execute(org.bukkit.command.CommandSender,
-	 * java.lang.String[])
-	 */
-	@Override
-	public void execute(final CommandSender sender, final CommandArgs args)
-			throws ActionNotPermitedException, PlayerNotFound {
-		if (!Users.isPlayer(sender)) {
-			return;
-		}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * be.Balor.Manager.ACCommands#execute(org.bukkit.command.CommandSender,
+         * java.lang.String[])
+         */
+        @Override
+        public void execute(final CommandSender sender, final CommandArgs args)
+                throws ActionNotPermitedException, PlayerNotFound {
+                if (!Users.isPlayer(sender)) {
+                        return;
+                }
 
-		final Player target = (Player) sender;
-		ACWorld w = ACWorld.getWorld(target.getWorld());
-		if (args.length >= 1) {
-			w = ACWorld.getWorld(args.getString(0));
-			if (!target.getWorld().equals(w.getHandle())
-					&& !PermissionManager.hasPerm(sender, "admincmd.spawn.tp."
-							+ w.getName().toLowerCase())) {
-				return;
-			}
+                final Player target = (Player) sender;
+                ACWorld w = ACWorld.getWorld(target.getWorld());
+                if (args.length >= 1) {
+                        w = ACWorld.getWorld(args.getString(0));
+                        if (!target.getWorld().equals(w.getHandle())
+                                && !PermissionManager.hasPerm(sender, "admincmd.spawn.tp."
+                                        + w.getName().toLowerCase())) {
+                                return;
+                        }
 
-		}
-		ACPluginManager.getScheduler().scheduleSyncDelayedTask(
-				ACHelper.getInstance().getCoreInstance(),
-				new DelayedTeleport(target, sender, w),
-				ConfigEnum.TP_DELAY.getLong());
-	}
+                }
+                ACPluginManager.getScheduler().scheduleSyncDelayedTask(
+                        ACHelper.getInstance().getCoreInstance(),
+                        new DelayedTeleport(target, sender, w),
+                        ConfigEnum.TP_DELAY.getLong());
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see be.Balor.Manager.Commands.CoreCommand#registerBukkitPerm()
-	 */
-	@Override
-	public void registerBukkitPerm() {
-		for (final World world : Bukkit.getWorlds()) {
-			this.permParent.addChild("admincmd.spawn.tp." + world.getName());
-		}
-		super.registerBukkitPerm();
-	}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see be.Balor.Manager.Commands.CoreCommand#registerBukkitPerm()
+         */
+        @Override
+        public void registerBukkitPerm() {
+                for (final World world : Bukkit.getWorlds()) {
+                        this.permParent.addChild("admincmd.spawn.tp." + world.getName());
+                }
+                super.registerBukkitPerm();
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see be.Balor.Manager.ACCommands#argsCheck(java.lang.String[])
-	 */
-	@Override
-	public boolean argsCheck(final String... args) {
-		return args != null;
-	}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see be.Balor.Manager.ACCommands#argsCheck(java.lang.String[])
+         */
+        @Override
+        public boolean argsCheck(final String... args) {
+                return args != null;
+        }
 
-	private class DelayedTeleport implements Runnable {
+        private class DelayedTeleport implements Runnable {
 
-		protected SimplifiedLocation locBefore;
-		protected Player target;
-		protected HashMap<String, String> replace;
-		protected CommandSender sender;
-		protected ACWorld world;
+                protected SimplifiedLocation locBefore;
+                protected Player target;
+                protected HashMap<String, String> replace;
+                protected CommandSender sender;
+                protected ACWorld world;
 
-		public DelayedTeleport(final Player target, final CommandSender sender,
-				final ACWorld world) {
-			this.target = target;
-			this.locBefore = new SimplifiedLocation(target.getLocation());
-			this.sender = sender;
-			this.world = world;
-			if (ConfigEnum.TP_DELAY.getLong() > 0) {
-				final Map<String, String> replace = new HashMap<String, String>();
-				replace.put(
-						"sec",
-						String.valueOf(ConfigEnum.TP_DELAY.getLong()
-								/ Utils.secInTick));
-				LocaleHelper.TELEPORT_SOON.sendLocale(target, replace);
-			}
-		}
+                public DelayedTeleport(final Player target, final CommandSender sender,
+                        final ACWorld world) {
+                        this.target = target;
+                        this.locBefore = new SimplifiedLocation(target.getLocation());
+                        this.sender = sender;
+                        this.world = world;
+                        if (ConfigEnum.TP_DELAY.getLong() > 0) {
+                                final Map<String, String> replace = new HashMap<String, String>();
+                                replace.put(
+                                        "sec",
+                                        String.valueOf(ConfigEnum.TP_DELAY.getLong()
+                                                / Utils.secInTick));
+                                LocaleHelper.TELEPORT_SOON.sendLocale(target, replace);
+                        }
+                }
 
-		@Override
-		public void run() {
-			if (!ConfigEnum.CHECKTP.getBoolean()) {
-				ACHelper.getInstance().spawn((Player) sender, world);
-				Users.sendMessage(sender, target, "spawn");
-				return;
-			}
+                @Override
+                public void run() {
+                        if (!ConfigEnum.CHECKTP.getBoolean()) {
+                                ACHelper.getInstance().spawn((Player) sender, world);
+                                Users.sendMessage(sender, target, "spawn");
+                                return;
+                        }
 
-			if (locBefore.equals(target.getLocation())) {
-				ACHelper.getInstance().spawn((Player) sender, world);
-				Users.sendMessage(sender, target, "spawn");
-			} else {
-				replace = new HashMap<String, String>();
-				replace.put("cmdname", "Warp");
-				Users.sendMessage(sender, target, "errorMoved", replace);
-			}
-		}
-	}
+                        if (locBefore.equals(target.getLocation())) {
+                                ACHelper.getInstance().spawn((Player) sender, world);
+                                Users.sendMessage(sender, target, "spawn");
+                        } else {
+                                replace = new HashMap<String, String>();
+                                replace.put("cmdname", "Warp");
+                                Users.sendMessage(sender, target, "errorMoved", replace);
+                        }
+                }
+        }
 }

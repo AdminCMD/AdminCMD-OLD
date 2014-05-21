@@ -1,19 +1,20 @@
-/************************************************************************
- * This file is part of AdminCmd.									
- *																		
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by	
- * the Free Software Foundation, either version 3 of the License, or		
- * (at your option) any later version.									
- *																		
- * AdminCmd is distributed in the hope that it will be useful,	
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the			
- * GNU General Public License for more details.							
- *																		
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.
- ************************************************************************/
+/**
+ * **********************************************************************
+ * This file is part of AdminCmd.
+ *
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.World;
 
 import java.util.HashSet;
@@ -36,7 +37,7 @@ import java.util.logging.Level;
 
 /**
  * @author Balor (aka Antoine Aflalo)
- * 
+ *
  */
 public class WorldManager {
 
@@ -44,12 +45,12 @@ public class WorldManager {
          * Cache of all loaded ACWorld(s)
          */
         private final ConcurrentMap<String, ACWorld> worlds = new MapMaker()
-                        .makeMap();
+                .makeMap();
         private AbstractWorldFactory worldFactory;
         private static final WorldManager INSTANCE = new WorldManager();
 
         /**
-         * 
+         *
          */
         private WorldManager() {
         }
@@ -63,7 +64,7 @@ public class WorldManager {
 
         /**
          * Add a new world
-         * 
+         *
          * @param world
          * @return if the world was added successfully
          */
@@ -78,8 +79,7 @@ public class WorldManager {
         }
 
         /**
-         * @param worldFactory
-         *            the worldFactory to set
+         * @param worldFactory the worldFactory to set
          */
         public void setWorldFactory(final AbstractWorldFactory worldFactory) {
                 if (this.worldFactory == null) {
@@ -89,7 +89,7 @@ public class WorldManager {
 
         /**
          * To convert the ACWorld using an another factory
-         * 
+         *
          * @param factory
          */
         public void convertFactory(final AbstractWorldFactory factory) {
@@ -98,7 +98,7 @@ public class WorldManager {
 
         /**
          * Build a converter for the current and the new factory
-         * 
+         *
          * @param newFactory
          * @return
          */
@@ -123,7 +123,7 @@ public class WorldManager {
                                 // This way it avoids getting requests for 'world' mixed up with
                                 // 'world_nether'
                                 final String found = Str.matchString(worlds.keySet(),
-                                                name.toUpperCase());
+                                        name.toUpperCase());
                                 if (found != null) {
                                         return worlds.get(found.toUpperCase());
                                 }
@@ -146,22 +146,22 @@ public class WorldManager {
 
         /**
          * Getting all the WarpsName using the world name as prefix
-         * 
+         *
          * @return
          */
         public Set<String> getAllWarpList() {
                 final Set<String> warps = new HashSet<String>();
                 for (final ACWorld world : worlds.values()) {
                         for (final String warp : world.getWarpList()) {
-                                warps.add(world.getName() + ":" + warp);                               
+                                warps.add(world.getName() + ":" + warp);
                         }
                 }
                 return warps;
         }
 
-         /**
+        /**
          * Getting all the Warps.
-         * 
+         *
          * @return
          */
         public List<Warp> getAllWarps() {

@@ -13,125 +13,127 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 public class InverseMaps {
-	private InverseMaps() {
-		// Not constructable
-	}
 
-	public static <K, V> Multimap<K, V> inverseMultimap(final Map<V, K> map, final Predicate<Map.Entry<V, K>> filter) {
-		final MapContainer container = new MapContainer(map);
+        private InverseMaps() {
+                // Not constructable
+        }
 
-		return new ForwardingMultimap<K, V>() {
-			// The cached multimap
-			private Multimap<K, V> inverseMultimap;
+        public static <K, V> Multimap<K, V> inverseMultimap(final Map<V, K> map, final Predicate<Map.Entry<V, K>> filter) {
+                final MapContainer container = new MapContainer(map);
 
-			@Override
-			protected Multimap<K, V> delegate() {
-				if (container.hasChanged()) {
-					inverseMultimap = HashMultimap.create();
+                return new ForwardingMultimap<K, V>() {
+                        // The cached multimap
+                        private Multimap<K, V> inverseMultimap;
 
-					// Construct the inverse map
-					for (final Map.Entry<V, K> entry : map.entrySet()) {
-						if (filter.apply(entry)) {
-							inverseMultimap.put(entry.getValue(), entry.getKey());
-						}
-					}
-					container.setChanged(false);
-				}
-				return inverseMultimap;
-			}
-		};
-	}
+                        @Override
+                        protected Multimap<K, V> delegate() {
+                                if (container.hasChanged()) {
+                                        inverseMultimap = HashMultimap.create();
 
-	public static <K, V> Map<K, V> inverseMap(final Map<V, K> map, final Predicate<Map.Entry<V, K>> filter) {
-		final MapContainer container = new MapContainer(map);
+                                        // Construct the inverse map
+                                        for (final Map.Entry<V, K> entry : map.entrySet()) {
+                                                if (filter.apply(entry)) {
+                                                        inverseMultimap.put(entry.getValue(), entry.getKey());
+                                                }
+                                        }
+                                        container.setChanged(false);
+                                }
+                                return inverseMultimap;
+                        }
+                };
+        }
 
-		return new ForwardingMap<K, V>() {
-			// The cached map
-			private Map<K, V> inverseMap;
+        public static <K, V> Map<K, V> inverseMap(final Map<V, K> map, final Predicate<Map.Entry<V, K>> filter) {
+                final MapContainer container = new MapContainer(map);
 
-			@Override
-			protected Map<K, V> delegate() {
-				if (container.hasChanged()) {
-					inverseMap = Maps.newHashMap();
+                return new ForwardingMap<K, V>() {
+                        // The cached map
+                        private Map<K, V> inverseMap;
 
-					// Construct the inverse map
-					for (final Map.Entry<V, K> entry : map.entrySet()) {
-						if (filter.apply(entry)) {
-							inverseMap.put(entry.getValue(), entry.getKey());
-						}
-					}
-					container.setChanged(false);
-				}
-				return inverseMap;
-			}
-		};
-	}
+                        @Override
+                        protected Map<K, V> delegate() {
+                                if (container.hasChanged()) {
+                                        inverseMap = Maps.newHashMap();
 
-	/**
-	 * Represents a class that can detect if a map has changed.
-	 * 
-	 * @author Kristian
-	 */
-	private static class MapContainer {
-		// For detecting changes
-		private final Field modCountField;
-		private int lastModCount;
+                                        // Construct the inverse map
+                                        for (final Map.Entry<V, K> entry : map.entrySet()) {
+                                                if (filter.apply(entry)) {
+                                                        inverseMap.put(entry.getValue(), entry.getKey());
+                                                }
+                                        }
+                                        container.setChanged(false);
+                                }
+                                return inverseMap;
+                        }
+                };
+        }
 
-		// The object along with whether or not this is the initial run
-		private final Object source;
-		private boolean changed;
+        /**
+         * Represents a class that can detect if a map has changed.
+         *
+         * @author Kristian
+         */
+        private static class MapContainer {
 
-		public MapContainer(final Object source) {
-			this.source = source;
-			this.changed = true;
-			this.modCountField = FieldUtils.getField(source.getClass(), "modCount", true);
-		}
+                // For detecting changes
+                private final Field modCountField;
+                private int lastModCount;
 
-		/**
-		 * Determine if the map has changed.
-		 * 
-		 * @return TRUE if it has, FALSE otherwise.
-		 */
-		public boolean hasChanged() {
-			// Check if unchanged
-			checkChanged();
-			return changed;
-		}
+                // The object along with whether or not this is the initial run
+                private final Object source;
+                private boolean changed;
 
-		/**
-		 * Mark the map as changed or unchanged.
-		 * 
-		 * @param changed
-		 *            - TRUE if the map has changed, FALSE otherwise.
-		 */
-		public void setChanged(final boolean changed) {
-			this.changed = changed;
-		}
+                public MapContainer(final Object source) {
+                        this.source = source;
+                        this.changed = true;
+                        this.modCountField = FieldUtils.getField(source.getClass(), "modCount", true);
+                }
 
-		/**
-		 * Check for modifications to the current map.
-		 */
-		protected void checkChanged() {
-			if (!changed) {
-				if (getModificationCount() != lastModCount) {
-					lastModCount = getModificationCount();
-					changed = true;
-				}
-			}
-		}
+                /**
+                 * Determine if the map has changed.
+                 *
+                 * @return TRUE if it has, FALSE otherwise.
+                 */
+                public boolean hasChanged() {
+                        // Check if unchanged
+                        checkChanged();
+                        return changed;
+                }
 
-		/**
-		 * Retrieve the current modification count.
-		 * 
-		 * @return The current count, or something different than lastModCount
-		 *         if not accessible.
-		 */
-		private int getModificationCount() {
-			try {
-				return modCountField != null ? modCountField.getInt(source) : lastModCount + 1;
-			} catch (final Exception e) {
-				throw new RuntimeException("Unable to retrieve modCount.", e);
-			}
-		}
-	}
+                /**
+                 * Mark the map as changed or unchanged.
+                 *
+                 * @param changed - TRUE if the map has changed, FALSE
+                 * otherwise.
+                 */
+                public void setChanged(final boolean changed) {
+                        this.changed = changed;
+                }
+
+                /**
+                 * Check for modifications to the current map.
+                 */
+                protected void checkChanged() {
+                        if (!changed) {
+                                if (getModificationCount() != lastModCount) {
+                                        lastModCount = getModificationCount();
+                                        changed = true;
+                                }
+                        }
+                }
+
+                /**
+                 * Retrieve the current modification count.
+                 *
+                 * @return The current count, or something different than
+                 * lastModCount if not accessible.
+                 */
+                private int getModificationCount() {
+                        try {
+                                return modCountField != null ? modCountField.getInt(source) : lastModCount + 1;
+                        } catch (final Exception e) {
+                                throw new RuntimeException("Unable to retrieve modCount.", e);
+                        }
+                }
+        }
 }

@@ -1,19 +1,20 @@
-/************************************************************************
- * This file is part of AdminCmd.									
- *																		
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by	
- * the Free Software Foundation, either version 3 of the License, or		
- * (at your option) any later version.									
- *																		
- * AdminCmd is distributed in the hope that it will be useful,	
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the			
- * GNU General Public License for more details.							
- *																		
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.
- ************************************************************************/
+/**
+ * **********************************************************************
+ * This file is part of AdminCmd.
+ *
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.Tools.Converter;
 
 import be.Balor.Player.AfterPlayerConvertTask;
@@ -29,46 +30,46 @@ import java.util.concurrent.Executors;
 
 /**
  * @author Antoine
- * 
+ *
  */
 public class PlayerConverter {
-	private final Executor pool = Executors.newFixedThreadPool(5);
-	private final IPlayerFactory oldFactory, newFactory;
-	private Runnable afterConvertTask;
 
-	/**
-	 * @param oldFactory
-	 * @param newFactory
-	 */
-	public PlayerConverter(final IPlayerFactory oldFactory,
-			final IPlayerFactory newFactory) {
-		super();
-		this.oldFactory = oldFactory;
-		this.newFactory = newFactory;
-	}
+        private final Executor pool = Executors.newFixedThreadPool(5);
+        private final IPlayerFactory oldFactory, newFactory;
+        private Runnable afterConvertTask;
 
-	public synchronized void convert() {
-		if (newFactory instanceof FilePlayerFactory) {
-			FilePlayer.scheduleAsyncSave();
-		}
-		final Set<UUID> existingPlayers = oldFactory.getExistingPlayers();
-		ACLogger.info("Begin conversion of " + existingPlayers.size()
-				+ " players");
-		for (final UUID uuid : this.oldFactory.getExistingPlayers()) {
-			pool.execute(new PlayerConvertTask(oldFactory, newFactory, uuid));
-		}
-		pool.execute(new AfterPlayerConvertTask(newFactory));
-		if (afterConvertTask != null) {
-			pool.execute(afterConvertTask);
-		}
-	}
+        /**
+         * @param oldFactory
+         * @param newFactory
+         */
+        public PlayerConverter(final IPlayerFactory oldFactory,
+                final IPlayerFactory newFactory) {
+                super();
+                this.oldFactory = oldFactory;
+                this.newFactory = newFactory;
+        }
 
-	/**
-	 * @param afterConvertTask
-	 *            the afterConvertTask to set
-	 */
-	public void setAfterConvertTask(final Runnable afterConvertTask) {
-		this.afterConvertTask = afterConvertTask;
-	}
+        public synchronized void convert() {
+                if (newFactory instanceof FilePlayerFactory) {
+                        FilePlayer.scheduleAsyncSave();
+                }
+                final Set<UUID> existingPlayers = oldFactory.getExistingPlayers();
+                ACLogger.info("Begin conversion of " + existingPlayers.size()
+                        + " players");
+                for (final UUID uuid : this.oldFactory.getExistingPlayers()) {
+                        pool.execute(new PlayerConvertTask(oldFactory, newFactory, uuid));
+                }
+                pool.execute(new AfterPlayerConvertTask(newFactory));
+                if (afterConvertTask != null) {
+                        pool.execute(afterConvertTask);
+                }
+        }
+
+        /**
+         * @param afterConvertTask the afterConvertTask to set
+         */
+        public void setAfterConvertTask(final Runnable afterConvertTask) {
+                this.afterConvertTask = afterConvertTask;
+        }
 
 }

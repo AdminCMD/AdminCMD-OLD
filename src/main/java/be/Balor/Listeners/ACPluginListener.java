@@ -1,19 +1,20 @@
-/************************************************************************
+/**
+ * **********************************************************************
  * This file is part of AdminCmd.
  *
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * AdminCmd is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.
- ************************************************************************/
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.Listeners;
 
 import in.mDev.MiracleM4n.mChatSuite.mChatSuite;
@@ -39,7 +40,7 @@ import de.diddiz.LogBlock.LogBlock;
 
 /**
  * @author Balor (aka Antoine Aflalo)
- * 
+ *
  */
 public class ACPluginListener implements Listener {
 
@@ -53,14 +54,14 @@ public class ACPluginListener implements Listener {
 
                 if (!PermissionManager.isVault()) {
                         final Plugin vault = ACPluginManager.getServer().getPluginManager()
-                                        .getPlugin("Vault");
+                                .getPlugin("Vault");
                         if (vault != null && vault.isEnabled()) {
                                 PermissionManager.setVault();
                         }
-                }               
+                }
                 if (Utils.oddItem == null) {
                         final Plugin items = ACPluginManager.getServer().getPluginManager()
-                                        .getPlugin("OddItem");
+                                .getPlugin("OddItem");
                         if (items != null && items.isEnabled()) {
                                 Utils.oddItem = (OddItemBase) items;
                                 ACLogger.info("Successfully linked with OddItem");
@@ -68,7 +69,7 @@ public class ACPluginListener implements Listener {
                 }
                 if (!SuperPermissions.isApiSet()) {
                         final Plugin mChatPlugin = ACPluginManager.getServer()
-                                        .getPluginManager().getPlugin("mChatSuite");
+                                .getPluginManager().getPlugin("mChatSuite");
                         if (mChatPlugin != null && mChatPlugin.isEnabled()) {
                                 SuperPermissions.setmChatapi((mChatSuite) mChatPlugin);
                                 Utils.mChatPresent = true;
@@ -77,7 +78,7 @@ public class ACPluginListener implements Listener {
                 }
                 if (Utils.logBlock == null) {
                         final Plugin plugin = ACPluginManager.getServer()
-                                        .getPluginManager().getPlugin("LogBlock");
+                                .getPluginManager().getPlugin("LogBlock");
                         if (plugin != null && plugin.isEnabled()) {
                                 Utils.setLogBlock(((LogBlock) plugin).getConsumer());
                                 ACLogger.info("Successfully linked with LogBlock");
@@ -85,14 +86,15 @@ public class ACPluginListener implements Listener {
                 }
                 if (Utils.myocPresent == false) {
                         final Plugin plugin = ACPluginManager.getServer()
-                                        .getPluginManager().getPlugin("MakeYourOwnCommands");
+                                .getPluginManager().getPlugin("MakeYourOwnCommands");
                         Utils.myocPresent = plugin != null && plugin.isEnabled();
-                        if(Utils.myocPresent)
+                        if (Utils.myocPresent) {
                                 ACLogger.info("Successfully linked with MakeYourOwnCommands");
+                        }
                 }
                 if (InvisibleWorker.dynmapAPI == null) {
                         final Plugin plugin = ACPluginManager.getServer()
-                                        .getPluginManager().getPlugin("dynmap");
+                                .getPluginManager().getPlugin("dynmap");
                         if (plugin != null && plugin.isEnabled()) {
                                 InvisibleWorker.dynmapAPI = (DynmapAPI) plugin;
                                 ACLogger.info("Successfully linked with Dynmap");
@@ -100,13 +102,13 @@ public class ACPluginListener implements Listener {
                 }
                 if (ConfigEnum.H_ALLPLUGIN.getBoolean()) {
                         for (final Plugin plugin : event.getPlugin().getServer()
-                                        .getPluginManager().getPlugins()) {
+                                .getPluginManager().getPlugins()) {
                                 HelpLister.getInstance().addPlugin(plugin);
                         }
                 }
                 if (!Utils.signExtention) {
                         final Plugin plugin = ACPluginManager.getServer()
-                                        .getPluginManager().getPlugin("SignExtensions");
+                                .getPluginManager().getPlugin("SignExtensions");
                         if (plugin != null) {
                                 Utils.signExtention = true;
                         }

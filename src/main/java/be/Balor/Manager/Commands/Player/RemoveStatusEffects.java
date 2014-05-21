@@ -37,91 +37,91 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class RemoveStatusEffects extends PlayerCommand {
 
-    private final static List<String> potions = new ArrayList<String>();
+        private final static List<String> potions = new ArrayList<String>();
 
-    static {
-        for (final PotionEffectType type : PotionEffectType.values()) {
-            if (type != null && type.getName() != null) {
-                potions.add(type.getName());
-            }
-        }
-    }
-
-    /**
-     *
-     */
-    public RemoveStatusEffects() {
-        permNode = "admincmd.player.rse";
-        cmdName = "bal_rse";
-        other = true;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * be.Balor.Manager.ACCommands#execute(org.bukkit.command.CommandSender,
-     * java.lang.String[])
-     */
-    @Override
-    public void execute(final CommandSender sender, final CommandArgs args)
-            throws ActionNotPermitedException, PlayerNotFound {
-
-        final Player target = Users.getUserParam(sender, args, permNode);
-        if (removeEffect(target, args)) {
-            LocaleHelper.EFFECT_REMOVE_SUCCESS.sendLocale(sender, "effect", args.getString(0));
-        } else {
-            LocaleHelper.ERROR_EFFECT.sendLocale(sender, "effect", args.getString(0));
-        }
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see be.Balor.Manager.ACCommands#argsCheck(java.lang.String[])
-     */
-    @Override
-    public boolean argsCheck(final String... args) {
-        return args.length != 0;
-    }
-
-    public boolean removeEffect(final Player target, final CommandArgs args) {
-        final String potion = args.getString(0);
-
-        if (potion == null){
-            return false;
-        }
-        
-        if (potion.equalsIgnoreCase("all")) {
-            for (PotionEffect effect : target.getActivePotionEffects()) {
-                target.removePotionEffect(effect.getType());
-            }
-            return true;
-
-        } else {
-
-            PotionEffectType type = null;
-
-            try {
-                int id = Integer.parseInt(potion);
-                type = PotionEffectType.getById(id);
-            } catch (NumberFormatException e) {
-            }
-
-            if (type == null) {
-                final String potionFound = Str.matchString(potions, potion);
-                if (potionFound == null) {
-                    return false;
+        static {
+                for (final PotionEffectType type : PotionEffectType.values()) {
+                        if (type != null && type.getName() != null) {
+                                potions.add(type.getName());
+                        }
                 }
-                type = PotionEffectType.getByName(potionFound);
-            }
-
-            if (target.hasPotionEffect(type)) {
-                target.removePotionEffect(type);
-                return true;
-            }
-            return false;
         }
-    }
+
+        /**
+         *
+         */
+        public RemoveStatusEffects() {
+                permNode = "admincmd.player.rse";
+                cmdName = "bal_rse";
+                other = true;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * be.Balor.Manager.ACCommands#execute(org.bukkit.command.CommandSender,
+         * java.lang.String[])
+         */
+        @Override
+        public void execute(final CommandSender sender, final CommandArgs args)
+                throws ActionNotPermitedException, PlayerNotFound {
+
+                final Player target = Users.getUserParam(sender, args, permNode);
+                if (removeEffect(target, args)) {
+                        LocaleHelper.EFFECT_REMOVE_SUCCESS.sendLocale(sender, "effect", args.getString(0));
+                } else {
+                        LocaleHelper.ERROR_EFFECT.sendLocale(sender, "effect", args.getString(0));
+                }
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see be.Balor.Manager.ACCommands#argsCheck(java.lang.String[])
+         */
+        @Override
+        public boolean argsCheck(final String... args) {
+                return args.length != 0;
+        }
+
+        public boolean removeEffect(final Player target, final CommandArgs args) {
+                final String potion = args.getString(0);
+
+                if (potion == null) {
+                        return false;
+                }
+
+                if (potion.equalsIgnoreCase("all")) {
+                        for (PotionEffect effect : target.getActivePotionEffects()) {
+                                target.removePotionEffect(effect.getType());
+                        }
+                        return true;
+
+                } else {
+
+                        PotionEffectType type = null;
+
+                        try {
+                                int id = Integer.parseInt(potion);
+                                type = PotionEffectType.getById(id);
+                        } catch (NumberFormatException e) {
+                        }
+
+                        if (type == null) {
+                                final String potionFound = Str.matchString(potions, potion);
+                                if (potionFound == null) {
+                                        return false;
+                                }
+                                type = PotionEffectType.getByName(potionFound);
+                        }
+
+                        if (target.hasPotionEffect(type)) {
+                                target.removePotionEffect(type);
+                                return true;
+                        }
+                        return false;
+                }
+        }
 }

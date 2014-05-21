@@ -14,7 +14,6 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  *  02111-1307 USA
  */
-
 package be.Balor.Tools.Compatibility;
 
 import java.util.regex.Matcher;
@@ -28,205 +27,196 @@ import com.google.common.collect.Ordering;
 
 /**
  * Determine the current Minecraft version.
- * 
+ *
  * @author Kristian
  */
 public class MinecraftVersion implements Comparable<MinecraftVersion> {
-	/**
-	 * Regular expression used to parse version strings.
-	 */
-	private static final String VERSION_PATTERN = ".*\\(MC:\\s*((?:\\d+\\.)*\\d)\\s*\\)";
 
-	private final int major;
-	private final int minor;
-	private final int build;
+        /**
+         * Regular expression used to parse version strings.
+         */
+        private static final String VERSION_PATTERN = ".*\\(MC:\\s*((?:\\d+\\.)*\\d)\\s*\\)";
 
-	// The development stage
-	private final String development;
+        private final int major;
+        private final int minor;
+        private final int build;
 
-	/**
-	 * Determine the current Minecraft version.
-	 * 
-	 * @param server
-	 *            - the Bukkit server that will be used to examine the MC
-	 *            version.
-	 */
-	public MinecraftVersion(final Server server) {
-		this(extractVersion(server.getVersion()));
-	}
+        // The development stage
+        private final String development;
 
-	/**
-	 * Construct a version object from the format major.minor.build.
-	 * 
-	 * @param versionOnly
-	 *            - the version in text form.
-	 */
-	public MinecraftVersion(final String versionOnly) {
-		final String[] section = versionOnly.split("-");
-		final int[] numbers = parseVersion(section[0]);
+        /**
+         * Determine the current Minecraft version.
+         *
+         * @param server - the Bukkit server that will be used to examine the MC
+         * version.
+         */
+        public MinecraftVersion(final Server server) {
+                this(extractVersion(server.getVersion()));
+        }
 
-		this.major = numbers[0];
-		this.minor = numbers[1];
-		this.build = numbers[2];
-		this.development = section.length > 1 ? section[1] : null;
-	}
+        /**
+         * Construct a version object from the format major.minor.build.
+         *
+         * @param versionOnly - the version in text form.
+         */
+        public MinecraftVersion(final String versionOnly) {
+                final String[] section = versionOnly.split("-");
+                final int[] numbers = parseVersion(section[0]);
 
-	/**
-	 * Construct a version object directly.
-	 * 
-	 * @param major
-	 *            - major version number.
-	 * @param minor
-	 *            - minor version number.
-	 * @param build
-	 *            - build version number.
-	 */
-	public MinecraftVersion(final int major, final int minor, final int build) {
-		this(major, minor, build, null);
-	}
+                this.major = numbers[0];
+                this.minor = numbers[1];
+                this.build = numbers[2];
+                this.development = section.length > 1 ? section[1] : null;
+        }
 
-	/**
-	 * Construct a version object directly.
-	 * 
-	 * @param major
-	 *            - major version number.
-	 * @param minor
-	 *            - minor version number.
-	 * @param build
-	 *            - build version number.
-	 * @param development
-	 *            - development stage.
-	 */
-	public MinecraftVersion(final int major, final int minor, final int build, final String development) {
-		this.major = major;
-		this.minor = minor;
-		this.build = build;
-		this.development = development;
-	}
+        /**
+         * Construct a version object directly.
+         *
+         * @param major - major version number.
+         * @param minor - minor version number.
+         * @param build - build version number.
+         */
+        public MinecraftVersion(final int major, final int minor, final int build) {
+                this(major, minor, build, null);
+        }
 
-	private int[] parseVersion(final String version) {
-		final String[] elements = version.split("\\.");
-		final int[] numbers = new int[3];
+        /**
+         * Construct a version object directly.
+         *
+         * @param major - major version number.
+         * @param minor - minor version number.
+         * @param build - build version number.
+         * @param development - development stage.
+         */
+        public MinecraftVersion(final int major, final int minor, final int build, final String development) {
+                this.major = major;
+                this.minor = minor;
+                this.build = build;
+                this.development = development;
+        }
 
-		// Make sure it's even a valid version
-		if (elements.length < 1) {
-			throw new IllegalStateException("Corrupt MC version: " + version);
-		}
+        private int[] parseVersion(final String version) {
+                final String[] elements = version.split("\\.");
+                final int[] numbers = new int[3];
 
-		// The String 1 or 1.2 is interpreted as 1.0.0 and 1.2.0 respectively.
-		for (int i = 0; i < Math.min(numbers.length, elements.length); i++) {
-			numbers[i] = Integer.parseInt(elements[i].trim());
-		}
-		return numbers;
-	}
+                // Make sure it's even a valid version
+                if (elements.length < 1) {
+                        throw new IllegalStateException("Corrupt MC version: " + version);
+                }
 
-	/**
-	 * Major version number
-	 * 
-	 * @return Current major version number.
-	 */
-	public int getMajor() {
-		return major;
-	}
+                // The String 1 or 1.2 is interpreted as 1.0.0 and 1.2.0 respectively.
+                for (int i = 0; i < Math.min(numbers.length, elements.length); i++) {
+                        numbers[i] = Integer.parseInt(elements[i].trim());
+                }
+                return numbers;
+        }
 
-	/**
-	 * Minor version number
-	 * 
-	 * @return Current minor version number.
-	 */
-	public int getMinor() {
-		return minor;
-	}
+        /**
+         * Major version number
+         *
+         * @return Current major version number.
+         */
+        public int getMajor() {
+                return major;
+        }
 
-	/**
-	 * Build version number
-	 * 
-	 * @return Current build version number.
-	 */
-	public int getBuild() {
-		return build;
-	}
+        /**
+         * Minor version number
+         *
+         * @return Current minor version number.
+         */
+        public int getMinor() {
+                return minor;
+        }
 
-	/**
-	 * Retrieve the development stage.
-	 * 
-	 * @return Development stage, or NULL if this is a release.
-	 */
-	public String getDevelopmentStage() {
-		return development;
-	}
+        /**
+         * Build version number
+         *
+         * @return Current build version number.
+         */
+        public int getBuild() {
+                return build;
+        }
 
-	/**
-	 * Retrieve the version String (major.minor.build) only.
-	 * 
-	 * @return A normal version string.
-	 */
-	public String getVersion() {
-		if (getDevelopmentStage() == null) {
-			return String.format("%s.%s.%s", getMajor(), getMinor(), getBuild());
-		} else {
-			return String.format("%s.%s.%s-%s", getMajor(), getMinor(), getBuild(), getDevelopmentStage());
-		}
-	}
+        /**
+         * Retrieve the development stage.
+         *
+         * @return Development stage, or NULL if this is a release.
+         */
+        public String getDevelopmentStage() {
+                return development;
+        }
 
-	@Override
-	public int compareTo(final MinecraftVersion o) {
-		if (o == null) {
-			return 1;
-		}
+        /**
+         * Retrieve the version String (major.minor.build) only.
+         *
+         * @return A normal version string.
+         */
+        public String getVersion() {
+                if (getDevelopmentStage() == null) {
+                        return String.format("%s.%s.%s", getMajor(), getMinor(), getBuild());
+                } else {
+                        return String.format("%s.%s.%s-%s", getMajor(), getMinor(), getBuild(), getDevelopmentStage());
+                }
+        }
 
-		return ComparisonChain.start().compare(getMajor(), o.getMajor()).compare(getMinor(), o.getMinor()).compare(getBuild(), o.getBuild()).
-		// No development String means it's a release
-				compare(getDevelopmentStage(), o.getDevelopmentStage(), Ordering.natural().nullsLast()).result();
-	}
+        @Override
+        public int compareTo(final MinecraftVersion o) {
+                if (o == null) {
+                        return 1;
+                }
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (obj == null) {
-			return false;
-		}
-		if (obj == this) {
-			return true;
-		}
+                return ComparisonChain.start().compare(getMajor(), o.getMajor()).compare(getMinor(), o.getMinor()).compare(getBuild(), o.getBuild()).
+                        // No development String means it's a release
+                        compare(getDevelopmentStage(), o.getDevelopmentStage(), Ordering.natural().nullsLast()).result();
+        }
 
-		if (obj instanceof MinecraftVersion) {
-			final MinecraftVersion other = (MinecraftVersion) obj;
+        @Override
+        public boolean equals(final Object obj) {
+                if (obj == null) {
+                        return false;
+                }
+                if (obj == this) {
+                        return true;
+                }
 
-			return getMajor() == other.getMajor() && getMinor() == other.getMinor() && getBuild() == other.getBuild()
-					&& Objects.equal(getDevelopmentStage(), other.getDevelopmentStage());
-		}
+                if (obj instanceof MinecraftVersion) {
+                        final MinecraftVersion other = (MinecraftVersion) obj;
 
-		return false;
-	}
+                        return getMajor() == other.getMajor() && getMinor() == other.getMinor() && getBuild() == other.getBuild()
+                                && Objects.equal(getDevelopmentStage(), other.getDevelopmentStage());
+                }
 
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(getMajor(), getMinor(), getBuild());
-	}
+                return false;
+        }
 
-	@Override
-	public String toString() {
-		// Convert to a String that we can parse back again
-		return String.format("(MC: %s)", getVersion());
-	}
+        @Override
+        public int hashCode() {
+                return Objects.hashCode(getMajor(), getMinor(), getBuild());
+        }
 
-	/**
-	 * Extract the Minecraft version from CraftBukkit itself.
-	 * 
-	 * @param server
-	 *            - the server object representing CraftBukkit.
-	 * @return The underlying MC version.
-	 * @throws IllegalStateException
-	 *             If we could not parse the version string.
-	 */
-	public static String extractVersion(final String text) {
-		final Pattern versionPattern = Pattern.compile(VERSION_PATTERN);
-		final Matcher version = versionPattern.matcher(text);
+        @Override
+        public String toString() {
+                // Convert to a String that we can parse back again
+                return String.format("(MC: %s)", getVersion());
+        }
 
-		if (version.matches() && version.group(1) != null) {
-			return version.group(1);
-		} else {
-			throw new IllegalStateException("Cannot parse version String '" + text + "'");
-		}
-	}
+        /**
+         * Extract the Minecraft version from CraftBukkit itself.
+         *
+         * @param server - the server object representing CraftBukkit.
+         * @return The underlying MC version.
+         * @throws IllegalStateException If we could not parse the version
+         * string.
+         */
+        public static String extractVersion(final String text) {
+                final Pattern versionPattern = Pattern.compile(VERSION_PATTERN);
+                final Matcher version = versionPattern.matcher(text);
+
+                if (version.matches() && version.group(1) != null) {
+                        return version.group(1);
+                } else {
+                        throw new IllegalStateException("Cannot parse version String '" + text + "'");
+                }
+        }
 }

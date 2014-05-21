@@ -1,19 +1,20 @@
-/** **********************************************************************
+/**
+ * **********************************************************************
  * This file is part of AdminCmd.
  *
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * AdminCmd is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd. If not, see <http://www.gnu.org/licenses/>.
- *********************************************************************** */
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.Tools.Update;
 
 import java.text.ParseException;
@@ -32,7 +33,7 @@ import com.google.common.collect.ComparisonChain;
 public class AdminCmdVersion implements Comparable<AdminCmdVersion> {
 
         private final static Pattern admincmdVersion = Pattern
-                        .compile("([\\d]*)\\.([\\d]*)\\.([\\d]*)(-SNAPSHOT | )\\(BUILD (.*)\\)");
+                .compile("([\\d]*)\\.([\\d]*)\\.([\\d]*)(-SNAPSHOT | )\\(BUILD (.*)\\)");
         private int major, minor, build;
         private boolean dev = false;
         private Date buildDate;
@@ -54,7 +55,7 @@ public class AdminCmdVersion implements Comparable<AdminCmdVersion> {
                                         dev = true;
                                 }
                                 buildDate = new SimpleDateFormat("dd.MM.yyyy '@' HH:mm:ss")
-                                                .parse(regexMatcher.group(5));
+                                        .parse(regexMatcher.group(5));
                         }
 
                 } catch (final PatternSyntaxException ex) {
@@ -86,7 +87,7 @@ public class AdminCmdVersion implements Comparable<AdminCmdVersion> {
                 int result = 1;
                 result = prime * result + build;
                 result = prime * result
-                                + ((buildDate == null) ? 0 : buildDate.hashCode());
+                        + ((buildDate == null) ? 0 : buildDate.hashCode());
                 result = prime * result + (dev ? 1231 : 1237);
                 result = prime * result + major;
                 result = prime * result + minor;
@@ -140,8 +141,8 @@ public class AdminCmdVersion implements Comparable<AdminCmdVersion> {
         @Override
         public String toString() {
                 return String
-                                .format("AdminCmdVersion [major=%s, minor=%s, build=%s, dev=%s, buildDate=%s]",
-                                                major, minor, build, dev, buildDate);
+                        .format("AdminCmdVersion [major=%s, minor=%s, build=%s, dev=%s, buildDate=%s]",
+                                major, minor, build, dev, buildDate);
         }
 
         /**
@@ -163,8 +164,8 @@ public class AdminCmdVersion implements Comparable<AdminCmdVersion> {
                 }
 
                 return ComparisonChain.start().compare(major, o.major)
-                                .compare(minor, o.minor).compare(build, o.build)
-                                .compare(buildDate, o.buildDate).result();
+                        .compare(minor, o.minor).compare(build, o.build)
+                        .compare(buildDate, o.buildDate).result();
         }
 
 }

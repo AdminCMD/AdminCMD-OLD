@@ -1,19 +1,20 @@
-/************************************************************************
- * This file is part of AdminCmd.									
- *																		
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by	
- * the Free Software Foundation, either version 3 of the License, or		
- * (at your option) any later version.									
- *																		
- * AdminCmd is distributed in the hope that it will be useful,	
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the			
- * GNU General Public License for more details.							
- *																		
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.
- ************************************************************************/
+/**
+ * **********************************************************************
+ * This file is part of AdminCmd.
+ *
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.Tools.Files;
 
 import java.util.ArrayList;
@@ -27,66 +28,67 @@ import org.bukkit.plugin.Plugin;
 
 /**
  * @author Balor (aka Antoine Aflalo)
- * 
+ *
  */
 public class PluginCommandUtil {
-	@SuppressWarnings("unchecked")
-	public static List<Command> parse(final Plugin plugin) {
-		try {
-			return PluginCommandYamlParser.parse(plugin);
-		} catch (final NoClassDefFoundError e) {
-			final List<Command> pluginCmds = new ArrayList<Command>();
-			final Object object = plugin.getDescription().getCommands();
 
-			if (object == null) {
-				return pluginCmds;
-			}
+        @SuppressWarnings("unchecked")
+        public static List<Command> parse(final Plugin plugin) {
+                try {
+                        return PluginCommandYamlParser.parse(plugin);
+                } catch (final NoClassDefFoundError e) {
+                        final List<Command> pluginCmds = new ArrayList<Command>();
+                        final Object object = plugin.getDescription().getCommands();
 
-			final Map<String, Map<String, Object>> map = (Map<String, Map<String, Object>>) object;
+                        if (object == null) {
+                                return pluginCmds;
+                        }
 
-			if (map != null) {
-				for (final Entry<String, Map<String, Object>> entry : map
-						.entrySet()) {
-					final Command newCmd = new FakePluginCommand(
-							entry.getKey(), plugin);
-					final Object description = entry.getValue().get(
-							"description");
-					final Object usage = entry.getValue().get("usage");
-					final Object aliases = entry.getValue().get("aliases");
-					final Object permission = entry.getValue()
-							.get("permission");
+                        final Map<String, Map<String, Object>> map = (Map<String, Map<String, Object>>) object;
 
-					if (description != null) {
-						newCmd.setDescription(description.toString());
-					}
+                        if (map != null) {
+                                for (final Entry<String, Map<String, Object>> entry : map
+                                        .entrySet()) {
+                                        final Command newCmd = new FakePluginCommand(
+                                                entry.getKey(), plugin);
+                                        final Object description = entry.getValue().get(
+                                                "description");
+                                        final Object usage = entry.getValue().get("usage");
+                                        final Object aliases = entry.getValue().get("aliases");
+                                        final Object permission = entry.getValue()
+                                                .get("permission");
 
-					if (usage != null) {
-						newCmd.setUsage(usage.toString());
-					}
+                                        if (description != null) {
+                                                newCmd.setDescription(description.toString());
+                                        }
 
-					if (aliases != null) {
-						final List<String> aliasList = new ArrayList<String>();
+                                        if (usage != null) {
+                                                newCmd.setUsage(usage.toString());
+                                        }
 
-						if (aliases instanceof List) {
-							for (final Object o : (List<Object>) aliases) {
-								aliasList.add(o.toString());
-							}
-						} else {
-							aliasList.add(aliases.toString());
-						}
+                                        if (aliases != null) {
+                                                final List<String> aliasList = new ArrayList<String>();
 
-						newCmd.setAliases(aliasList);
-					}
+                                                if (aliases instanceof List) {
+                                                        for (final Object o : (List<Object>) aliases) {
+                                                                aliasList.add(o.toString());
+                                                        }
+                                                } else {
+                                                        aliasList.add(aliases.toString());
+                                                }
 
-					if (permission != null) {
-						newCmd.setPermission(permission.toString());
-					}
+                                                newCmd.setAliases(aliasList);
+                                        }
 
-					pluginCmds.add(newCmd);
-				}
-			}
-			return pluginCmds;
-		}
-	}
+                                        if (permission != null) {
+                                                newCmd.setPermission(permission.toString());
+                                        }
+
+                                        pluginCmds.add(newCmd);
+                                }
+                        }
+                        return pluginCmds;
+                }
+        }
 
 }

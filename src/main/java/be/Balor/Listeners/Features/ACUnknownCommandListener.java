@@ -28,13 +28,13 @@ public class ACUnknownCommandListener implements Listener {
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onUnknownCommand(final PlayerCommandPreprocessEvent event) {
 
-                String cmd = event.getMessage().replaceFirst("/", "").split(" ")[0];              
+                String cmd = event.getMessage().replaceFirst("/", "").split(" ")[0];
 
                 final Player player = event.getPlayer();
                 if (!isCmdRegistered(cmd)) {
                         LocaleHelper.UNKNOWN_COMMAND.sendLocale(player);
                         System.out.println(player.getName() + " issued server command: "
-                                        + event.getMessage());
+                                + event.getMessage());
                         event.setCancelled(true);
                 }
         }

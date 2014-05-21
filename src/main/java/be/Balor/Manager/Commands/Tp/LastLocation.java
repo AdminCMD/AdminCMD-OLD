@@ -1,19 +1,20 @@
-/************************************************************************
+/**
+ * **********************************************************************
  * This file is part of AdminCmd.
  *
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * AdminCmd is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.
- ************************************************************************/
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.Manager.Commands.Tp;
 
 import org.bukkit.Location;
@@ -31,50 +32,50 @@ import be.Balor.bukkit.AdminCmd.ACPluginManager;
 
 /**
  * @author Balor (aka Antoine Aflalo)
- * 
+ *
  */
 public class LastLocation extends TeleportCommand {
 
-	/**
-	 *
-	 */
-	public LastLocation() {
-		permNode = "admincmd.tp.back";
-		cmdName = "bal_back";
-	}
+        /**
+         *
+         */
+        public LastLocation() {
+                permNode = "admincmd.tp.back";
+                cmdName = "bal_back";
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see be.Balor.Manager.ACCommand#execute(org.bukkit.command.CommandSender,
-	 * java.lang.String[])
-	 */
-	@Override
-	public void execute(final CommandSender sender, final CommandArgs args)
-			throws ActionNotPermitedException, PlayerNotFound {
-		final Player player = Users.getUserParam(sender, args, permNode);
-		Location loc = null;
-		final ACPlayer target = ACPlayer.getPlayer(player);
-		loc = target.getLastLocation();
-		if (loc == null) {
-			LocaleManager.sI18n(sender, "noLastLocation");
-			return;
-		}
-		ACPluginManager.scheduleSyncTask(new TeleportTask(target.getHandler(),
-				loc));
-		LocaleManager.sI18n(sender, "telportSuccess");
-		target.setLastLocation(null);
+        /*
+         * (non-Javadoc)
+         * 
+         * @see be.Balor.Manager.ACCommand#execute(org.bukkit.command.CommandSender,
+         * java.lang.String[])
+         */
+        @Override
+        public void execute(final CommandSender sender, final CommandArgs args)
+                throws ActionNotPermitedException, PlayerNotFound {
+                final Player player = Users.getUserParam(sender, args, permNode);
+                Location loc = null;
+                final ACPlayer target = ACPlayer.getPlayer(player);
+                loc = target.getLastLocation();
+                if (loc == null) {
+                        LocaleManager.sI18n(sender, "noLastLocation");
+                        return;
+                }
+                ACPluginManager.scheduleSyncTask(new TeleportTask(target.getHandler(),
+                        loc));
+                LocaleManager.sI18n(sender, "telportSuccess");
+                target.setLastLocation(null);
 
-	}
+        }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see be.Balor.Manager.ACCommand#argsCheck(java.lang.String[])
-	 */
-	@Override
-	public boolean argsCheck(final String... args) {
-		return true;
-	}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see be.Balor.Manager.ACCommand#argsCheck(java.lang.String[])
+         */
+        @Override
+        public boolean argsCheck(final String... args) {
+                return true;
+        }
 
 }

@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
- ***********************************************************************
+ * **********************************************************************
  */
 package be.Balor.Manager.Commands;
 
@@ -65,16 +65,19 @@ public class ACCommandContainer {
 
         /**
          * Check if the args were typed correct.
+         *
          * @return true if the args has been checked.
          */
         public boolean argsCheck() {
-                String t = ""; 
-                
-                for(String s : argsStrings) {
-                        if(s.startsWith("/")) continue;
+                String t = "";
+
+                for (String s : argsStrings) {
+                        if (s.startsWith("/")) {
+                                continue;
+                        }
                         t += s + " ";
                 }
-                
+
                 String[] arg = t.split(" ");
                 if (!cmd.argsCheck(arg)) {
                         if (!HelpLister.getInstance().displayExactCommandHelp(sender,
@@ -94,7 +97,9 @@ public class ACCommandContainer {
          */
         public void execute() throws PlayerNotFound, ActionNotPermitedException {
                 logCommand();
-                if(!argsCheck()) return;
+                if (!argsCheck()) {
+                        return;
+                }
                 cmd.execute(sender, args);
         }
 

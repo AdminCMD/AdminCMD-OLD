@@ -1,19 +1,20 @@
-/************************************************************************
- * This file is part of AdminCmd.									
- *																		
- * AdminCmd is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by	
- * the Free Software Foundation, either version 3 of the License, or		
- * (at your option) any later version.									
- *																		
- * AdminCmd is distributed in the hope that it will be useful,	
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the			
- * GNU General Public License for more details.							
- *																		
- * You should have received a copy of the GNU General Public License
- * along with AdminCmd.  If not, see <http://www.gnu.org/licenses/>.
- ************************************************************************/
+/**
+ * **********************************************************************
+ * This file is part of AdminCmd.
+ *
+ * AdminCmd is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * AdminCmd is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * AdminCmd. If not, see <http://www.gnu.org/licenses/>.
+ * **********************************************************************
+ */
 package be.Balor.bukkit.AdminCmd;
 
 import java.util.Collections;
@@ -35,177 +36,175 @@ import be.Balor.Tools.Debug.DebugLog;
 
 /**
  * @author Balor (aka Antoine Aflalo)
- * 
+ *
  */
 public class ACPluginManager {
-	private final static ACPluginManager instance = new ACPluginManager();
-	private final Map<String, AbstractAdminCmdPlugin> pluginInstances = Collections.synchronizedMap(new HashMap<String, AbstractAdminCmdPlugin>());
-	private final static Server server = Bukkit.getServer();
-	private static AbstractAdminCmdPlugin corePlugin;
-	private static Graph graph = null;
 
-	/**
-	 * @return the instance
-	 */
-	public static ACPluginManager getInstance() {
-		return instance;
-	}
+        private final static ACPluginManager instance = new ACPluginManager();
+        private final Map<String, AbstractAdminCmdPlugin> pluginInstances = Collections.synchronizedMap(new HashMap<String, AbstractAdminCmdPlugin>());
+        private final static Server server = Bukkit.getServer();
+        private static AbstractAdminCmdPlugin corePlugin;
+        private static Graph graph = null;
 
-	public static AbstractAdminCmdPlugin getPluginInstance(final String name) {
-		return getInstance().getPlugin(name);
-	}
+        /**
+         * @return the instance
+         */
+        public static ACPluginManager getInstance() {
+                return instance;
+        }
 
-	/**
-	 * Get Bukkit Scheduler
-	 * 
-	 * @return
-	 */
-	public static BukkitScheduler getScheduler() {
-		return server.getScheduler();
-	}
+        public static AbstractAdminCmdPlugin getPluginInstance(final String name) {
+                return getInstance().getPlugin(name);
+        }
 
-	/**
-	 * @return the server
-	 */
-	public static Server getServer() {
-		return server;
-	}
+        /**
+         * Get Bukkit Scheduler
+         *
+         * @return
+         */
+        public static BukkitScheduler getScheduler() {
+                return server.getScheduler();
+        }
 
-	public static void registerACPlugin(final AbstractAdminCmdPlugin addon) throws IllegalArgumentException {
-		getInstance().registerPlugin(addon);
-	}
+        /**
+         * @return the server
+         */
+        public static Server getServer() {
+                return server;
+        }
 
-	/**
-	 * Register a Plugin Command
-	 * 
-	 * @param clazz
-	 */
-	public static void registerCommand(final Class<? extends CoreCommand> clazz) throws IllegalArgumentException {
-		CommandManager.getInstance().registerCommand(clazz);
-	}
+        public static void registerACPlugin(final AbstractAdminCmdPlugin addon) throws IllegalArgumentException {
+                getInstance().registerPlugin(addon);
+        }
 
-	/**
-	 * Schedule a SyncTask
-	 * 
-	 * @param task
-	 * @return
-	 */
-	public static int scheduleSyncTask(final Runnable task) {
-		return server.getScheduler().scheduleSyncDelayedTask(corePlugin, task);
-	}
+        /**
+         * Register a Plugin Command
+         *
+         * @param clazz
+         */
+        public static void registerCommand(final Class<? extends CoreCommand> clazz) throws IllegalArgumentException {
+                CommandManager.getInstance().registerCommand(clazz);
+        }
 
-	/**
-	 * Schedule a AsyncDelayedTask
-	 * 
-	 * @param task
-	 * @return
-	 */
-	public static int runTaskLaterAsynchronously(final Runnable task) {
-		return server.getScheduler().runTaskAsynchronously(corePlugin, task).getTaskId();
-	}
+        /**
+         * Schedule a SyncTask
+         *
+         * @param task
+         * @return
+         */
+        public static int scheduleSyncTask(final Runnable task) {
+                return server.getScheduler().scheduleSyncDelayedTask(corePlugin, task);
+        }
 
-	/**
-	 * @param corePlugin
-	 *            the corePlugin to set
-	 */
-	static void setCorePlugin(final AbstractAdminCmdPlugin corePlugin) {
-		ACPluginManager.corePlugin = corePlugin;
-	}
+        /**
+         * Schedule a AsyncDelayedTask
+         *
+         * @param task
+         * @return
+         */
+        public static int runTaskLaterAsynchronously(final Runnable task) {
+                return server.getScheduler().runTaskAsynchronously(corePlugin, task).getTaskId();
+        }
 
-	/**
-	 * @return the corePlugin
-	 */
-	public static AbstractAdminCmdPlugin getCorePlugin() {
-		return corePlugin;
-	}
+        /**
+         * @param corePlugin the corePlugin to set
+         */
+        static void setCorePlugin(final AbstractAdminCmdPlugin corePlugin) {
+                ACPluginManager.corePlugin = corePlugin;
+        }
 
-	/**
-	 * @param metrics
-	 *            the metrics to set
-	 */
-	static void setMetrics(final Metrics metrics) {
-		ACPluginManager.graph = metrics.createGraph("Plugins");
-	}
+        /**
+         * @return the corePlugin
+         */
+        public static AbstractAdminCmdPlugin getCorePlugin() {
+                return corePlugin;
+        }
 
-	public static void unRegisterACPlugin(final Plugin addon) {
-		if (addon instanceof AbstractAdminCmdPlugin) {
-			getInstance().unRegisterPlugin((AbstractAdminCmdPlugin) addon);
-		}
-	}
+        /**
+         * @param metrics the metrics to set
+         */
+        static void setMetrics(final Metrics metrics) {
+                ACPluginManager.graph = metrics.createGraph("Plugins");
+        }
 
-	private ACPluginManager() {
-	}
+        public static void unRegisterACPlugin(final Plugin addon) {
+                if (addon instanceof AbstractAdminCmdPlugin) {
+                        getInstance().unRegisterPlugin((AbstractAdminCmdPlugin) addon);
+                }
+        }
 
-	/**
-	 * Get registered plugin
-	 * 
-	 * @param name
-	 *            name of the addon
-	 * @return the addon or null if not registered
-	 */
-	protected AbstractAdminCmdPlugin getPlugin(final String name) {
-		return pluginInstances.get(name);
-	}
+        private ACPluginManager() {
+        }
 
-	/**
-	 * Register a AdminCmd addon
-	 * 
-	 * @param addon
-	 */
-	protected void registerPlugin(final AbstractAdminCmdPlugin addon) throws IllegalArgumentException {
-		if (!pluginInstances.containsKey(addon.getAddonName())) {
-			pluginInstances.put(addon.getAddonName(), addon);
-			DebugLog.INSTANCE.info("Registering : " + addon);
-			if (corePlugin == null || addon.equals(corePlugin)) {
-				return;
-			}
-			graph.addPlotter(new Metrics.Plotter() {
+        /**
+         * Get registered plugin
+         *
+         * @param name name of the addon
+         * @return the addon or null if not registered
+         */
+        protected AbstractAdminCmdPlugin getPlugin(final String name) {
+                return pluginInstances.get(name);
+        }
 
-				@Override
-				public int getValue() {
-					return 1;
-				}
+        /**
+         * Register a AdminCmd addon
+         *
+         * @param addon
+         */
+        protected void registerPlugin(final AbstractAdminCmdPlugin addon) throws IllegalArgumentException {
+                if (!pluginInstances.containsKey(addon.getAddonName())) {
+                        pluginInstances.put(addon.getAddonName(), addon);
+                        DebugLog.INSTANCE.info("Registering : " + addon);
+                        if (corePlugin == null || addon.equals(corePlugin)) {
+                                return;
+                        }
+                        graph.addPlotter(new Metrics.Plotter() {
 
-				@Override
-				public String getColumnName() {
-					return "Addon " + addon.getAddonName();
-				}
-			});
-		} else {
-			throw new IllegalArgumentException("Plugin " + addon.getAddonName() + " Already registered.");
-		}
-	}
+                                @Override
+                                public int getValue() {
+                                        return 1;
+                                }
 
-	void stopChildrenPlugins() {
-		ACLogger.info("Disabling all AdminCmd's plugins");
-		for (final Entry<String, AbstractAdminCmdPlugin> plugin : pluginInstances.entrySet()) {
-			if (plugin.getValue().isEnabled()) {
-				server.getPluginManager().disablePlugin(plugin.getValue());
-			}
-		}
-	}
+                                @Override
+                                public String getColumnName() {
+                                        return "Addon " + addon.getAddonName();
+                                }
+                        });
+                } else {
+                        throw new IllegalArgumentException("Plugin " + addon.getAddonName() + " Already registered.");
+                }
+        }
 
-	/**
-	 * Unregister an AdminCmd addon
-	 * 
-	 * @param addon
-	 */
-	protected void unRegisterPlugin(final AbstractAdminCmdPlugin addon) {
-		pluginInstances.remove(addon.getAddonName());
-		if (!addon.equals(corePlugin)) {
-			graph.removePlotter(new Metrics.Plotter() {
+        void stopChildrenPlugins() {
+                ACLogger.info("Disabling all AdminCmd's plugins");
+                for (final Entry<String, AbstractAdminCmdPlugin> plugin : pluginInstances.entrySet()) {
+                        if (plugin.getValue().isEnabled()) {
+                                server.getPluginManager().disablePlugin(plugin.getValue());
+                        }
+                }
+        }
 
-				@Override
-				public int getValue() {
-					return 1;
-				}
+        /**
+         * Unregister an AdminCmd addon
+         *
+         * @param addon
+         */
+        protected void unRegisterPlugin(final AbstractAdminCmdPlugin addon) {
+                pluginInstances.remove(addon.getAddonName());
+                if (!addon.equals(corePlugin)) {
+                        graph.removePlotter(new Metrics.Plotter() {
 
-				@Override
-				public String getColumnName() {
-					return "Addon " + addon.getAddonName();
-				}
-			});
-		}
-	}
+                                @Override
+                                public int getValue() {
+                                        return 1;
+                                }
+
+                                @Override
+                                public String getColumnName() {
+                                        return "Addon " + addon.getAddonName();
+                                }
+                        });
+                }
+        }
 
 }
