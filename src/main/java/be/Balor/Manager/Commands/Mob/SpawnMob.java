@@ -17,19 +17,18 @@
  */
 package be.Balor.Manager.Commands.Mob;
 
-import java.util.HashMap;
-
+import be.Balor.Manager.Commands.CommandArgs;
+import be.Balor.Manager.Exceptions.ActionNotPermitedException;
+import be.Balor.Manager.Exceptions.PlayerNotFound;
+import be.Balor.Manager.LocaleManager;
+import be.Balor.Tools.CommandUtils.Users;
+import be.Balor.bukkit.AdminCmd.ACPluginManager;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
-import be.Balor.Manager.LocaleManager;
-import be.Balor.Manager.Commands.CommandArgs;
-import be.Balor.Manager.Exceptions.ActionNotPermitedException;
-import be.Balor.Manager.Exceptions.PlayerNotFound;
-import be.Balor.Tools.CommandUtils.Users;
-import be.Balor.bukkit.AdminCmd.ACPluginManager;
+import java.util.HashMap;
 
 /**
  * @author Balor (aka Antoine Aflalo)
@@ -107,17 +106,7 @@ public class SpawnMob extends MobCommand {
                         EntityType ct = null;
                         if (name.contains(":")) {
                                 final String[] creatures = name.split(":");
-                                // TODO: Remove this if-case as soon as bukkit fixes the
-                                // spelling error
-                                if (creatures[0].equalsIgnoreCase("Ocelot")) {
-                                        creatures[0] = "Ozelot";
-                                }
                                 ct = EntityType.fromName(creatures[0]);
-                                // TODO: Remove this if-case as soon as bukkit fixes the
-                                // spelling error
-                                if (creatures[1].equalsIgnoreCase("Ocelot")) {
-                                        creatures[1] = "Ozelot";
-                                }
                                 final EntityType ct2 = EntityType.fromName(creatures[1]);
                                 if (ct == null) {
                                         replace.put("mob", creatures[0]);
@@ -198,12 +187,15 @@ public class SpawnMob extends MobCommand {
 
                 protected EntityType passenger;
 
-                /**
-                 * @param loc
-                 * @param nb
-                 * @param ct
-                 * @param player
-                 */
+			/**
+			 *
+			 * @param loc
+			 * @param nb
+			 * @param mount
+			 * @param passenger
+			 * @param player
+			 * @param sender
+			 */
                 public PassengerMob(final Location loc, final int nb,
                         final EntityType mount, final EntityType passenger,
                         final Player player, final CommandSender sender) {

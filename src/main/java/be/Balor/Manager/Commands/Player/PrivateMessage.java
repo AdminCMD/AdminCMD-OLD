@@ -17,25 +17,24 @@
  */
 package be.Balor.Manager.Commands.Player;
 
-import java.util.HashMap;
-
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.Player;
-
-import be.Balor.Manager.LocaleManager;
 import be.Balor.Manager.Commands.CommandArgs;
 import be.Balor.Manager.Exceptions.ActionNotPermitedException;
 import be.Balor.Manager.Exceptions.PlayerNotFound;
+import be.Balor.Manager.LocaleManager;
 import be.Balor.Player.ACPlayer;
-import be.Balor.Tools.Type;
 import be.Balor.Tools.CommandUtils.Materials;
 import be.Balor.Tools.CommandUtils.Users;
 import be.Balor.Tools.Debug.ACLogger;
+import be.Balor.Tools.Type;
 import be.Balor.bukkit.AdminCmd.ACHelper;
 import be.Balor.bukkit.AdminCmd.ConfigEnum;
 import be.Balor.bukkit.AdminCmd.LocaleHelper;
 import belgium.Balor.Workers.AFKWorker;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
+
+import java.util.HashMap;
 
 /**
  * @author Balor (aka Antoine Aflalo)
@@ -68,7 +67,7 @@ public class PrivateMessage extends PlayerCommand {
                 if (args.getString(0).equalsIgnoreCase("console")) {
                         String senderPm = "";
                         String msg = "";
-                        String senderName = "Server Admin";
+                        String senderName = "Server Admin"; // TODO: Locale
                         if (Users.isPlayer(sender, false)) {
                                 final Player pSender = (Player) sender;
                                 senderName = pSender.getName();
