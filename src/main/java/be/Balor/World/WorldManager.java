@@ -25,7 +25,6 @@ import org.bukkit.World;
 
 import be.Balor.Manager.Exceptions.WorldNotLoaded;
 import be.Balor.Tools.Converter.WorldConverter;
-import be.Balor.Tools.Debug.ACLogger;
 import be.Balor.Tools.Debug.DebugLog;
 import be.Balor.Tools.Help.String.Str;
 import be.Balor.Tools.Warp;
@@ -33,7 +32,6 @@ import be.Balor.Tools.Warp;
 import com.google.common.collect.MapMaker;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  * @author Balor (aka Antoine Aflalo)
