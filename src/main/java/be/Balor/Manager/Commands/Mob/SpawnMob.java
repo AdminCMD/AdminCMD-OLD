@@ -104,20 +104,28 @@ public class SpawnMob extends MobCommand {
                                                 playerLoc.getPitch())).add(0, 1D, 0);
                         }
                         EntityType ct = null;
-                        
+
                         if (name.contains(":")) {
                                 final String[] creatures = name.split(":");
                                 ct = EntityType.fromName(creatures[0]);
                                 EntityType ct2 = EntityType.fromName(creatures[1]);
-                                
-                                if(ct == null) {
-                                        ct = EntityType.valueOf(creatures[0].toUpperCase());
+
+                                if (ct == null) {
+                                        try {
+                                                ct = EntityType.valueOf(creatures[0].toUpperCase());
+                                        } catch (IllegalArgumentException ex) {
+                                                ct = null;
+                                        }
                                 }
-                                
-                                if(ct2 == null) {
-                                        ct2 = EntityType.valueOf(creatures[1].toUpperCase());
+
+                                if (ct2 == null) {
+                                        try {
+                                                ct2 = EntityType.valueOf(creatures[1].toUpperCase());
+                                        } catch (IllegalArgumentException ex) {
+                                                ct2 = null;
+                                        }
                                 }
-                                
+
                                 if (ct == null) {
                                         replace.put("mob", creatures[0]);
                                         LocaleManager.sI18n(sender, "errorMob", replace);
@@ -133,15 +141,15 @@ public class SpawnMob extends MobCommand {
                                         ct, ct2, player, sender));
                         } else {
                                 ct = EntityType.fromName(name);
-                                
-                                if(ct == null) {
+
+                                if (ct == null) {
                                         try {
                                                 ct = EntityType.valueOf(name.toUpperCase());
-                                        } catch(IllegalArgumentException e) {
+                                        } catch (IllegalArgumentException e) {
                                                 ct = null;
                                         }
                                 }
-                                
+
                                 if (ct == null) {
                                         LocaleManager.sI18n(sender, "errorMob", replace);
                                         return;
@@ -206,15 +214,15 @@ public class SpawnMob extends MobCommand {
 
                 protected EntityType passenger;
 
-			/**
-			 *
-			 * @param loc
-			 * @param nb
-			 * @param mount
-			 * @param passenger
-			 * @param player
-			 * @param sender
-			 */
+                /**
+                 *
+                 * @param loc
+                 * @param nb
+                 * @param mount
+                 * @param passenger
+                 * @param player
+                 * @param sender
+                 */
                 public PassengerMob(final Location loc, final int nb,
                         final EntityType mount, final EntityType passenger,
                         final Player player, final CommandSender sender) {
