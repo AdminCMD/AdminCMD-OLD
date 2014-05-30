@@ -17,19 +17,19 @@
  */
 package be.Balor.Manager.Commands.Player;
 
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
 import be.Balor.Manager.Commands.CommandArgs;
 import be.Balor.Manager.Exceptions.ActionNotPermitedException;
 import be.Balor.Manager.Exceptions.PlayerNotFound;
 import be.Balor.Tools.CommandUtils.Users;
 import be.Balor.Tools.Help.String.Str;
 import be.Balor.bukkit.AdminCmd.LocaleHelper;
-import java.util.ArrayList;
-import java.util.List;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author JeterLP
@@ -89,11 +89,7 @@ public class RemoveStatusEffects extends PlayerCommand {
         public boolean removeEffect(final Player target, final CommandArgs args) {
                 final String potion = args.getString(0);
 
-                if (potion == null) {
-                        return false;
-                }
-
-                if (potion.equalsIgnoreCase("all")) {
+				if ((potion == null) || potion.equalsIgnoreCase("all")) {
                         for (PotionEffect effect : target.getActivePotionEffects()) {
                                 target.removePotionEffect(effect.getType());
                         }
