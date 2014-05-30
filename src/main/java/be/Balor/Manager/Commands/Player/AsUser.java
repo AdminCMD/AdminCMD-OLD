@@ -66,8 +66,8 @@ public class AsUser extends PlayerCommand {
                 ACPluginManager.scheduleSyncTask(new Runnable() {
                         @Override
                         public void run() {
-                                Bukkit.getServer().dispatchCommand(target, argsString); // TODO: Let it work with ACUnknownCommandListener
-
+                                target.performCommand(argsString);
+                                //Since now, commands need to start with '/'
                         }
                 });
 
