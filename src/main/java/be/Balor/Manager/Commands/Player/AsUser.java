@@ -22,12 +22,13 @@ import be.Balor.Manager.Exceptions.ActionNotPermitedException;
 import be.Balor.Manager.Exceptions.PlayerNotFound;
 import be.Balor.Manager.LocaleManager;
 import be.Balor.Tools.CommandUtils.Immunity;
+import be.Balor.bukkit.AdminCmd.ACHelper;
 import be.Balor.bukkit.AdminCmd.ACPluginManager;
+import be.Balor.bukkit.AdminCmd.LocaleHelper;
+import java.util.HashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.util.HashMap;
 
 /**
  * @author Antoine
@@ -63,6 +64,13 @@ public class AsUser extends PlayerCommand {
                         throw new PlayerNotFound(LocaleManager.I18n("insufficientLvl"), sender);
                 }
                 final String argsString = args.concatWithout(0);
+
+                if (!ACHelper.getInstance().isCommandRegistered(argsString.replaceFirst("/", ""))) {
+                        LocaleHelper.UNKNOWN_COMMAND.sendLocale(sender);
+                        System.out.println(sender.getName() + " issued server command: " + argsString);
+                        return;
+                }
+
                 ACPluginManager.scheduleSyncTask(new Runnable() {
                         @Override
                         public void run() {

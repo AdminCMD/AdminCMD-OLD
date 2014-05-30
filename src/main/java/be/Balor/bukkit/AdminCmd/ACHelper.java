@@ -22,6 +22,7 @@ import be.Balor.Player.sql.SQLPlayerFactory;
 import be.Balor.Tools.Blocks.BlockRemanence;
 import be.Balor.Tools.CommandUtils.Materials;
 import be.Balor.Tools.CommandUtils.Users;
+import be.Balor.Tools.Compatibility.Reflect.FieldUtils;
 import be.Balor.Tools.Configuration.ExConfigurationSection;
 import be.Balor.Tools.Configuration.File.ExtendedConfiguration;
 import be.Balor.Tools.Converter.PlayerConverter;
@@ -80,6 +81,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
@@ -1947,5 +1949,23 @@ public class ACHelper {
                         }
                 }
                 return false;
+        }
+
+        public boolean isCommandRegistered(String command) {
+                SimpleCommandMap cmdMap = FieldUtils.getCommandMap();
+
+                if (ConfigEnum.UNKNOWN_CMD_LIST.getStringList().contains(command)) {
+                        return true;
+                }
+
+                if (Utils.myocPresent == true && de.JeterLP.MakeYourOwnCommands.Command.CommandManager.isRegistered("/".concat(command))) {
+                        return true;
+                }
+
+                if (cmdMap == null) {
+                        return true;
+                }
+
+                return cmdMap.getCommand(command) != null;
         }
 }
