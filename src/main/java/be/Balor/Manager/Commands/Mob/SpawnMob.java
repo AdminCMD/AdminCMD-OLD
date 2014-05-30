@@ -104,10 +104,20 @@ public class SpawnMob extends MobCommand {
                                                 playerLoc.getPitch())).add(0, 1D, 0);
                         }
                         EntityType ct = null;
+                        
                         if (name.contains(":")) {
                                 final String[] creatures = name.split(":");
                                 ct = EntityType.fromName(creatures[0]);
-                                final EntityType ct2 = EntityType.fromName(creatures[1]);
+                                EntityType ct2 = EntityType.fromName(creatures[1]);
+                                
+                                if(ct == null) {
+                                        ct = EntityType.valueOf(creatures[0].toUpperCase());
+                                }
+                                
+                                if(ct2 == null) {
+                                        ct2 = EntityType.valueOf(creatures[1].toUpperCase());
+                                }
+                                
                                 if (ct == null) {
                                         replace.put("mob", creatures[0]);
                                         LocaleManager.sI18n(sender, "errorMob", replace);
@@ -123,6 +133,15 @@ public class SpawnMob extends MobCommand {
                                         ct, ct2, player, sender));
                         } else {
                                 ct = EntityType.fromName(name);
+                                
+                                if(ct == null) {
+                                        try {
+                                                ct = EntityType.valueOf(name.toUpperCase());
+                                        } catch(IllegalArgumentException e) {
+                                                ct = null;
+                                        }
+                                }
+                                
                                 if (ct == null) {
                                         LocaleManager.sI18n(sender, "errorMob", replace);
                                         return;
