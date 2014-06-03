@@ -29,6 +29,7 @@ import java.util.HashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 /**
  * @author Antoine
@@ -65,19 +66,17 @@ public class AsUser extends PlayerCommand {
                 }
                 final String argsString = args.concatWithout(0);
 
-                if (!ACHelper.getInstance().isCommandRegistered(argsString.replaceFirst("/", ""))) {
-                        LocaleHelper.UNKNOWN_COMMAND.sendLocale(sender);
-                        System.out.println(sender.getName() + " issued server command: " + argsString);
-                        return;
-                }
+                PlayerCommandPreprocessEvent event = new PlayerCommandPreprocessEvent(target, argsString);
+                sender.getServer().getPluginManager().callEvent(event);
 
-                ACPluginManager.scheduleSyncTask(new Runnable() {
-                        @Override
-                        public void run() {
-                                target.performCommand(argsString);
-                                //Since now, commands need to start with '/'
-                        }
-                });
+                if (!event.isCancelled()) {
+                        ACPluginManager.scheduleSyncTask(new Runnable() {
+                                @Override
+                                public void run() {
+                                        target.performCommand(argsString);
+                                }
+                        });
+                }
 
         }
 
